@@ -1,5 +1,6 @@
 
 import Cards
+import RunGame
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
 -- obtain a number representing how many cards are stacked in the
@@ -43,9 +44,19 @@ value (Add card hand) =
     else tempValue
 
 -- implement the function "gameOver"
+gameOver :: Hand -> Bool
+gameOver hand = value hand > 21
+
 -- implement the function "winner".
-card1 = Card King Spades -- 10
+winner :: Hand -> Hand -> Player
+winner guestHand bankHand | value guestHand     == value bankHand = Bank
+                          | gameOver guestHand  = Bank
+                          | gameOver bankHand   = Guest
+                          | value guestHand > value bankHand = Guest
+                          | otherwise = Bank
+------------------------------------------------------------
+card1 = Card (Numeric 3) Spades -- 10
 card2 = Card King Spades -- 11
 card3 = Card (Numeric 7) Spades -- 4
 hand1 = (Add card3 (Add card2 (Add card1 Empty)))
-hand2 = (Add card3 (Add card2 (Add card1 Empty)))
+hand2 = (Add card3 (Add card3 Empty))
