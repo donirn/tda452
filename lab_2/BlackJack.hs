@@ -19,5 +19,9 @@
 -- and part of Task 3.3,
 -- implement the function "empty",
 -- implement the function "value"
+valueRank :: Rank -> Integer
+valueRank (Numeric a) = a
+valueRank Ace = 11
+valueRank otherwise = 10
 -- implement the function "gameOver"
 -- implement the function "winner".
