@@ -29,5 +29,10 @@ valueRank otherwise = 10
 valueCard :: Card -> Integer
 valueCard card = valueRank (rank card)
 
+numberOfAces :: Hand -> Integer
+numberOfAces Empty = 0
+numberOfAces (Add (Card Ace suit) hand) = 1 + numberOfAces hand 
+numberOfAces (Add card hand) = numberOfAces hand
+
 -- implement the function "gameOver"
 -- implement the function "winner".
