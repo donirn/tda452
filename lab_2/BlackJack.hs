@@ -1,5 +1,5 @@
 
--- Part A: Task 3.1 (reading the document),
+import Cards
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
 -- obtain a number representing how many cards are stacked in the
@@ -16,8 +16,12 @@
 -- This allows to pattern-match a type describing a card in order
 -- to generate a sum of ones representing the size.
 
--- and part of Task 3.3,
+-- Task 3.3,
 -- implement the function "empty",
+empty :: Hand
+empty = Empty
 -- implement the function "value"
+--value :: Hand -> Integer
+
 -- implement the function "gameOver"
 -- implement the function "winner".
