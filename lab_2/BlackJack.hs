@@ -26,5 +26,8 @@ valueRank (Numeric a) = a
 valueRank Ace = 11
 valueRank otherwise = 10
 
+valueCard :: Card -> Integer
+valueCard card = valueRank (rank card)
+
 -- implement the function "gameOver"
 -- implement the function "winner".
