@@ -21,7 +21,10 @@ import Cards
 empty :: Hand
 empty = Empty
 -- implement the function "value"
---value :: Hand -> Integer
+valueRank :: Rank -> Integer
+valueRank (Numeric a) = a
+valueRank Ace = 11
+valueRank otherwise = 10
 
 -- implement the function "gameOver"
 -- implement the function "winner".
