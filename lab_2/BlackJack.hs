@@ -27,8 +27,8 @@ empty = Empty
 -- calculate the overall value of card collections.
 valueRank :: Rank -> Integer
 valueRank (Numeric a) = a
-valueRank Ace = 11
-valueRank otherwise = 10 -- Jack, Queen, King
+valueRank Ace         = 11
+valueRank otherwise   = 10 -- Jack, Queen, King
 
 -- Function valueCard: Extracts the value of a card based solely on the rank.
 valueCard :: Card -> Integer
