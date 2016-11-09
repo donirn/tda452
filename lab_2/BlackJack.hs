@@ -27,8 +27,8 @@ empty = Empty
 -- calculate the overall value of card collections.
 valueRank :: Rank -> Integer
 valueRank (Numeric a) = a
-valueRank Ace = 11
-valueRank otherwise = 10 -- Jack, Queen, King
+valueRank Ace         = 11
+valueRank otherwise   = 10 -- Jack, Queen, King
 
 -- Function valueCard: Extracts the value of a card based solely on the rank.
 valueCard :: Card -> Integer
@@ -38,9 +38,9 @@ valueCard card = valueRank (rank card)
 -- for a given hand.
 numberOfAces :: Hand -> Integer
 numberOfAces Empty = 0
-numberOfAces (Add (Card Ace suit) hand) =
-                            1 + numberOfAces hand -- matches an Ace
-numberOfAces (Add card hand) = numberOfAces hand -- any other kind of card.
+numberOfAces (Add card hand)
+            | rank card == Ace = 1 + numberOfAces hand -- matches an Ace
+            | otherwise        = numberOfAces hand -- any other kind of card.
 
 -- Function value: Calculates the value of a hand based on the overall
 -- bound of 21 that makes Ace value to have a higher value.
@@ -62,11 +62,10 @@ gameOver hand = value hand > 21
 -- Function winner: Considers all the game rules as boolean conditions over
 -- a pair of hands.
 winner :: Hand -> Hand -> Player
-winner guestHand bankHand | value guestHand     == value bankHand = Bank
-                          | gameOver guestHand  = Bank
-                          | gameOver bankHand   = Guest
-                          | value guestHand > value bankHand = Guest
-                          | otherwise = Bank
+winner guestHand bankHand | gameOver guestHand                = Bank
+                          | gameOver bankHand                 = Guest
+                          | value guestHand <= value bankHand = Bank
+                          | otherwise                         = Guest
 ------------------------------------------------------------
 -- Tests
 card1 = Card (Numeric 3) Spades -- 10
