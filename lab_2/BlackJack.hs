@@ -18,36 +18,49 @@ import RunGame
 -- to generate a sum of ones representing the size.
 
 -- Task 3.3,
--- implement the function "empty",
+-- Function empty: Represents the base case for a hand.
 empty :: Hand
 empty = Empty
--- implement the function "value"
+
+-- Function valueRank: Gives an numeric meaning for the different ranks.
+-- From this function it is possible to construct other functions to
+-- calculate the overall value of card collections.
 valueRank :: Rank -> Integer
 valueRank (Numeric a) = a
 valueRank Ace = 11
-valueRank otherwise = 10
+valueRank otherwise = 10 -- Jack, Queen, King
 
+-- Function valueCard: Extracts the value of a card based solely on the rank.
 valueCard :: Card -> Integer
 valueCard card = valueRank (rank card)
 
+-- Function numberOfAces: Counts, in a recursive fashion, the number of aces
+-- for a given hand.
 numberOfAces :: Hand -> Integer
 numberOfAces Empty = 0
-numberOfAces (Add (Card Ace suit) hand) = 1 + numberOfAces hand
-numberOfAces (Add card hand) = numberOfAces hand
+numberOfAces (Add (Card Ace suit) hand) =
+                            1 + numberOfAces hand -- matches an Ace
+numberOfAces (Add card hand) = numberOfAces hand -- any other kind of card.
 
+-- Function value: Calculates the value of a hand based on the overall
+-- bound of 21 that makes Ace value to have a higher value.
+-- This is done by taking in consideration the accumulated value each time
+-- whenever the base case is not the one to compute.
 value :: Hand -> Integer
 value Empty = 0
 value (Add card hand) =
-  let tempValue = value hand + valueCard card
-  in if tempValue > 21
-    then tempValue - (numberOfAces (Add card hand) * 10)
-    else tempValue
+  let accumulatedValue = value hand + valueCard card
+  in if accumulatedValue > 21
+    -- Considers the value of an Ace as 1 i.e. substract 10 * number of aces.
+    then accumulatedValue - (numberOfAces (Add card hand) * 10)
+    else accumulatedValue
 
--- implement the function "gameOver"
+-- Function gameOver: Basic game rule.
 gameOver :: Hand -> Bool
 gameOver hand = value hand > 21
 
--- implement the function "winner".
+-- Function winner: Considers all the game rules as boolean conditions over
+-- a pair of hands.
 winner :: Hand -> Hand -> Player
 winner guestHand bankHand | value guestHand     == value bankHand = Bank
                           | gameOver guestHand  = Bank
@@ -55,6 +68,7 @@ winner guestHand bankHand | value guestHand     == value bankHand = Bank
                           | value guestHand > value bankHand = Guest
                           | otherwise = Bank
 ------------------------------------------------------------
+-- Tests
 card1 = Card (Numeric 3) Spades -- 10
 card2 = Card King Spades -- 11
 card3 = Card (Numeric 7) Spades -- 4
