@@ -17,6 +17,14 @@ import RunGame
 -- This allows to pattern-match a type describing a card in order
 -- to generate a sum of ones representing the size.
 
+-- Calculating the size of a hand2 manually:
+-- size hand2 =  size Add (Card (Numeric 2) Hearts)
+--                     (Add (Card Jack Spades) Empty)
+--              = 1 + size Add (Card Jack Spades) Empty
+--              = 1 + 1 + size Empty
+--              = 1 + 1 + 0
+--              = 2
+
 -- Task 3.3,
 -- Function empty: Represents the base case for a hand.
 empty :: Hand
