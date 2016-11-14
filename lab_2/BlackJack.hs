@@ -1,6 +1,8 @@
-
+module BlackJack where
 import Cards
 import RunGame
+import Test.QuickCheck
+
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
 -- obtain a number representing how many cards are stacked in the
@@ -74,10 +76,23 @@ winner guestHand bankHand | gameOver guestHand                = Bank
                           | value guestHand <= value bankHand = Bank
                           | otherwise                         = Guest
 
+-- Function (<+) Puts the first hand on top of the second.
+(<+) :: Hand -> Hand -> Hand
+(<+) Empty scnHand = scnHand
+(<+) fstHand Empty = fstHand
+(<+) (Add card hand) scnHand = (Add card (hand <+ scnHand))
+
 -- a QuickCheck property to check concatenation of 2 hands
 prop_onTopOf_assoc :: Hand -> Hand -> Hand -> Bool
 prop_onTopOf_assoc p1 p2 p3 =
     p1<+(p2<+p3) == (p1<+p2)<+p3
+
+-- TEST: Furthermore the size of the combined hand should be the sum of the sizes of the two individual hands:
+prop_size_onTopOf :: Hand -> Hand -> Bool
+prop_size_onTopOf hand1 hand2 = size hand1 + size hand2 == size (hand1 <+ hand2)
+
+-- Function fullDeck
+--fullDeck :: Hand
 
 ------------------------------------------------------------
 -- Tests
