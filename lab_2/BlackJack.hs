@@ -73,6 +73,12 @@ winner guestHand bankHand | gameOver guestHand                = Bank
                           | gameOver bankHand                 = Guest
                           | value guestHand <= value bankHand = Bank
                           | otherwise                         = Guest
+
+-- a QuickCheck property to check concatenation of 2 hands
+prop_onTopOf_assoc :: Hand -> Hand -> Hand -> Bool
+prop_onTopOf_assoc p1 p2 p3 =
+    p1<+(p2<+p3) == (p1<+p2)<+p3
+
 ------------------------------------------------------------
 -- Tests
 card1 = Card (Numeric 3) Spades -- 10
