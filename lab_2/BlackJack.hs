@@ -37,7 +37,7 @@ empty = Empty
 valueRank :: Rank -> Integer
 valueRank (Numeric a) = a
 valueRank Ace         = 11
-valueRank otherwise   = 10 -- Jack, Queen, King
+valueRank _           = 10 -- Jack, Queen, King
 
 -- Function valueCard: Extracts the value of a card based solely on the rank.
 valueCard :: Card -> Integer
@@ -47,9 +47,8 @@ valueCard card = valueRank (rank card)
 -- for a given hand.
 numberOfAces :: Hand -> Integer
 numberOfAces Empty = 0
-numberOfAces (Add card hand)
-            | rank card == Ace = 1 + numberOfAces hand -- matches an Ace
-            | otherwise        = numberOfAces hand -- any other kind of card.
+numberOfAces (Add (Card Ace _) hand) = 1 + numberOfAces hand -- Ace
+numberOfAces (Add _ hand) = numberOfAces hand -- any other kind of card.
 
 -- Function value: Calculates the value of a hand based on the overall
 -- bound of 21 that makes Ace value to have a higher value.
