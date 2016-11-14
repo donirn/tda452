@@ -121,10 +121,11 @@ playBank d = drawCard d Empty where
 --shuffle g deck = 
 --  (n1, g1) = randomR (0, (size deck) - 1) g
 
---drawNthCard :: Integer -> (hand,card,hand) -> Integer -> (hand,card,hand)
---drawNthCard n (Add card hand) | n >= size hand + 1 = error "card is out of index"
---                              | n == 0             = (hand, card)
---                              | otherwise          =  
+getNthCard :: Integer -> Hand -> Card
+getNthCard n h | n < 0 || n >= size h = error "out of index"
+getNthCard n h = iterHand h 0 where
+                 iterHand (Add card hand) iter | iter == n = card
+                                               | otherwise = iterHand hand (iter + 1)
 
 ------------------------------------------------------------
 -- Tests
