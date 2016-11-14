@@ -1,7 +1,7 @@
 module BlackJack where
 import Cards
 import RunGame
-import Test.QuickCheck
+--import Test.QuickCheck
 import System.Random
 
 -- Task 3.2 Size function description:
@@ -112,20 +112,29 @@ draw (Add card deck) hand = (deck, (Add card hand) )
 -- Function playBank: Given a deck, play for the bank according to the rules
 -- above (starting with an empty hand), and return the bank’s final hand:
 playBank :: Hand -> Hand
-playBank d = drawCard d Empty where
-  drawCard deck hand | value hand >=16 = hand
-                     | otherwise       = drawCard (fst t) (snd t) where
-                                     t = draw deck hand
+playBank d = drawCard d Empty
+  where drawCard deck hand | value hand >=16 = hand
+                           | otherwise       = drawCard (fst t) (snd t) 
+                                               where t = draw deck hand
 
---shuffle :: StdGen -> Hand -> Hand
---shuffle g deck = 
---  (n1, g1) = randomR (0, (size deck) - 1) g
+shuffle :: StdGen -> Hand -> Hand
+shuffle g deck = buildDeck Empty 0 g deck
+
+buildDeck :: Hand -> Integer -> StdGen -> Hand -> Hand
+buildDeck newDeck iter g deck | iter == size deck = newDeck
+                              | otherwise         = buildDeck (Add newCard newDeck) (iter+1) g' deck
+                                                    where (number, g') = randomNumber g deck
+                                                          newCard = getNthCard number deck
+
+randomNumber :: StdGen -> Hand -> (Integer, StdGen)
+randomNumber g deck = randomR (0, (size deck) - 1) g
+
 
 getNthCard :: Integer -> Hand -> Card
 getNthCard n h | n < 0 || n >= size h = error "out of index"
 getNthCard n h = iterHand h 0 where
-                 iterHand (Add card hand) iter | iter == n = card
-                                               | otherwise = iterHand hand (iter + 1)
+  iterHand (Add card hand) iter | iter == n = card
+                                | otherwise = iterHand hand (iter + 1)
 
 ------------------------------------------------------------
 -- Tests
