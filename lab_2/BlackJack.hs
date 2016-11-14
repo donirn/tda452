@@ -91,8 +91,16 @@ prop_onTopOf_assoc p1 p2 p3 =
 prop_size_onTopOf :: Hand -> Hand -> Bool
 prop_size_onTopOf hand1 hand2 = size hand1 + size hand2 == size (hand1 <+ hand2)
 
+suitDeck :: Suit -> Hand
+suitDeck suit = foldr (<+) Empty hands
+                where ranks =  [Jack, Queen, King, Ace] ++
+                                [Numeric n | n<- [2..10]]
+                      cards = [Card rank suit | rank <- ranks]
+                      hands = [Add card Empty | card <- cards]
+
 -- Function fullDeck
---fullDeck :: Hand
+fullDeck :: Hand
+fullDeck = suitDeck Hearts <+ suitDeck Spades <+ suitDeck Diamonds <+ suitDeck Clubs
 
 ------------------------------------------------------------
 -- Tests
