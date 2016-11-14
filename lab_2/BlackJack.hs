@@ -1,6 +1,7 @@
-
+module BlackJack where
 import Cards
 import RunGame
+
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
 -- obtain a number representing how many cards are stacked in the
@@ -74,6 +75,19 @@ winner guestHand bankHand | gameOver guestHand                = Bank
                           | gameOver bankHand                 = Guest
                           | value guestHand <= value bankHand = Bank
                           | otherwise                         = Guest
+
+-- Function (<+) Puts the first hand on top of the second.
+(<+) :: Hand -> Hand -> Hand
+(<+) Empty scnHand = scnHand
+(<+) fstHand Empty = fstHand
+(<+) (Add card hand) scnHand = (Add card (hand <+ scnHand))
+
+-- TEST: Furthermore the size of the combined hand should be the sum of the sizes of the two individual hands:
+-- prop_size_onTopOf :: Hand -> Hand -> Bool
+
+-- Function fullDeck
+--fullDeck :: Hand
+
 ------------------------------------------------------------
 -- Tests
 card1 = Card (Numeric 3) Spades -- 10
