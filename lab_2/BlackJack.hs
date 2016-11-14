@@ -102,6 +102,19 @@ suitDeck suit = foldr (<+) Empty hands
 fullDeck :: Hand
 fullDeck = suitDeck Hearts <+ suitDeck Spades <+ suitDeck Diamonds <+ suitDeck Clubs
 
+-- Function draw: Given a deck and a hand, draw one card from the deck and
+-- put on the hand. Return both the deck and the hand (in that order).
+draw :: Hand -> Hand -> (Hand,Hand)
+draw Empty hand = error "draw: The deck is empty."
+draw (Add card deck) hand = (deck, (Add card hand) )
+
+playBank :: Hand -> Hand
+playBank d = drawCard d Empty where
+  drawCard deck hand | value hand >=16 = hand
+                     | otherwise       = drawCard (fst t) (snd t) where
+                                     t = draw deck hand
+
+
 ------------------------------------------------------------
 -- Tests
 card1 = Card (Numeric 3) Spades -- 10
