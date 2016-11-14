@@ -2,6 +2,7 @@ module BlackJack where
 import Cards
 import RunGame
 import Test.QuickCheck
+import System.Random
 
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
@@ -116,6 +117,14 @@ playBank d = drawCard d Empty where
                      | otherwise       = drawCard (fst t) (snd t) where
                                      t = draw deck hand
 
+--shuffle :: StdGen -> Hand -> Hand
+--shuffle g deck = 
+--  (n1, g1) = randomR (0, (size deck) - 1) g
+
+--drawNthCard :: Integer -> (hand,card,hand) -> Integer -> (hand,card,hand)
+--drawNthCard n (Add card hand) | n >= size hand + 1 = error "card is out of index"
+--                              | n == 0             = (hand, card)
+--                              | otherwise          =  
 
 ------------------------------------------------------------
 -- Tests
