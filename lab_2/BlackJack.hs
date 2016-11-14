@@ -108,6 +108,8 @@ draw :: Hand -> Hand -> (Hand,Hand)
 draw Empty hand = error "draw: The deck is empty."
 draw (Add card deck) hand = (deck, (Add card hand) )
 
+-- Function playBank: Given a deck, play for the bank according to the rules
+-- above (starting with an empty hand), and return the bank’s final hand:
 playBank :: Hand -> Hand
 playBank d = drawCard d Empty where
   drawCard deck hand | value hand >=16 = hand
