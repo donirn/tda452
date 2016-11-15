@@ -1,7 +1,7 @@
 module BlackJack where
 import Cards
 import RunGame
---import Test.QuickCheck
+import Test.QuickCheck hiding (shuffle)
 import System.Random
 
 -- Task 3.2 Size function description:
@@ -118,23 +118,31 @@ playBank d = drawCard d Empty
                                                where t = draw deck hand
 
 shuffle :: StdGen -> Hand -> Hand
-shuffle g deck = buildDeck Empty 0 g deck
+shuffle g deck = buildDeck Empty g deck
 
-buildDeck :: Hand -> Integer -> StdGen -> Hand -> Hand
-buildDeck newDeck iter g deck | iter == size deck = newDeck
-                              | otherwise         = buildDeck (Add newCard newDeck) (iter+1) g' deck
-                                                    where (number, g') = randomNumber g deck
-                                                          newCard = getNthCard number deck
+buildDeck :: Hand -> StdGen -> Hand -> Hand
+buildDeck newDeck g deck | size deck == 0 = newDeck
+                         | otherwise      = buildDeck (Add card' newDeck) g' deck'
+                                            where (number, g')   = randomNumber g deck
+                                                  (card', deck') = drawNthCard number deck
 
 randomNumber :: StdGen -> Hand -> (Integer, StdGen)
 randomNumber g deck = randomR (0, (size deck) - 1) g
 
 
-getNthCard :: Integer -> Hand -> Card
-getNthCard n h | n < 0 || n >= size h = error "out of index"
-getNthCard n h = iterHand h 0 where
-  iterHand (Add card hand) iter | iter == n = card
-                                | otherwise = iterHand hand (iter + 1)
+drawNthCard :: Integer -> Hand -> (Card, Hand)
+drawNthCard n h | n < 0 || n >= size h = error "out of index"
+drawNthCard n h = iterHand h 0 Empty where
+  iterHand (Add card hand) iter checkedStack | iter == n = (card, checkedStack <+ hand)
+                                             | otherwise = iterHand hand (iter + 1) (Add card checkedStack)
+
+prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool
+prop_shuffle_sameCards g c h =
+    c `belongsTo` h == c `belongsTo` shuffle g h
+
+belongsTo :: Card -> Hand -> Bool
+c `belongsTo` Empty      = False
+c `belongsTo` (Add c' h) = (c == c') || (c `belongsTo` h)
 
 ------------------------------------------------------------
 -- Tests
@@ -143,3 +151,6 @@ card2 = Card King Spades -- 11
 card3 = Card (Numeric 7) Spades -- 4
 hand1 = (Add card3 (Add card2 (Add card1 Empty)))
 hand2 = (Add card3 (Add card3 Empty))
+
+cardTest = Card {rank = Numeric 2, suit = Spades}
+handTest = Add (Card {rank = King, suit = Spades}) Empty
