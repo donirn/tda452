@@ -121,20 +121,22 @@ shuffle :: StdGen -> Hand -> Hand
 shuffle g deck = buildDeck Empty g deck
 
 buildDeck :: Hand -> StdGen -> Hand -> Hand
-buildDeck newDeck g deck | size deck == 0 = newDeck
-                         | otherwise      = buildDeck (Add card' newDeck) g' deck'
-                                            where (number, g')   = randomNumber g deck
-                                                  (card', deck') = drawNthCard number deck
+buildDeck newDeck g d | size d == 0  = newDeck
+                      | otherwise    = buildDeck (Add c' newDeck) g' d'
+                                       where (n, g')  = randomNumber g d
+                                             (c', d') = drawNthCard n d
 
 randomNumber :: StdGen -> Hand -> (Integer, StdGen)
-randomNumber g deck = randomR (0, (size deck) - 1) g
+randomNumber g d = randomR (0, (size d) - 1) g
 
 
 drawNthCard :: Integer -> Hand -> (Card, Hand)
 drawNthCard n h | n < 0 || n >= size h = error "out of index"
-drawNthCard n h = iterHand h 0 Empty where
-  iterHand (Add card hand) iter checkedStack | iter == n = (card, checkedStack <+ hand)
-                                             | otherwise = iterHand hand (iter + 1) (Add card checkedStack)
+drawNthCard n h = iterNthCard h n 0 Empty
+
+iterNthCard :: Hand -> Integer -> Integer -> Hand -> (Card, Hand)
+iterNthCard (Add c h) n i s | i == n    = (c, s <+ h)
+                            | otherwise = iterNthCard h (i + 1) (Add c s)
 
 prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool
 prop_shuffle_sameCards g c h =
