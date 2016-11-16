@@ -1,8 +1,8 @@
 module BlackJack where
-import Cards
-import RunGame
-import Test.QuickCheck hiding (shuffle)
-import System.Random
+import           Cards
+import           RunGame
+import           System.Random
+import           Test.QuickCheck hiding (shuffle)
 
 -- Task 3.2 Size function description:
 -- The signature of the function describes that from a hand we
@@ -48,9 +48,10 @@ valueCard card = valueRank (rank card)
 -- Function numberOfAces: Counts, in a recursive fashion, the number of aces
 -- for a given hand.
 numberOfAces :: Hand -> Integer
-numberOfAces Empty = 0
+numberOfAces Empty                   = 0
 numberOfAces (Add (Card Ace _) hand) = 1 + numberOfAces hand -- Ace
-numberOfAces (Add _ hand) = numberOfAces hand -- any other kind of card.
+numberOfAces (Add _ hand)            = numberOfAces hand  -- any other
+                                                          --kind of card.
 
 -- Function value: Calculates the value of a hand based on the overall
 -- bound of 21 that makes Ace value to have a higher value.
@@ -79,8 +80,8 @@ winner guestHand bankHand | gameOver guestHand                = Bank
 
 -- Function (<+) Puts the first hand on top of the second.
 (<+) :: Hand -> Hand -> Hand
-(<+) Empty scnHand = scnHand
-(<+) fstHand Empty = fstHand
+(<+) Empty scnHand           = scnHand
+(<+) fstHand Empty           = fstHand
 (<+) (Add card hand) scnHand = (Add card (hand <+ scnHand))
 
 -- a QuickCheck property to check concatenation of 2 hands
@@ -88,10 +89,12 @@ prop_onTopOf_assoc :: Hand -> Hand -> Hand -> Bool
 prop_onTopOf_assoc p1 p2 p3 =
     p1<+(p2<+p3) == (p1<+p2)<+p3
 
--- TEST: Furthermore the size of the combined hand should be the sum of the sizes of the two individual hands:
+-- TEST: Furthermore the size of the combined hand should be the sum of the
+-- sizes of the two individual hands:
 prop_size_onTopOf :: Hand -> Hand -> Bool
-prop_size_onTopOf hand1 hand2 = size hand1 + size hand2 == size (hand1 <+ hand2)
-
+prop_size_onTopOf hand1 hand2 = size hand1 + size hand2
+                                  == size (hand1 <+ hand2)
+-- Function suitDeck: Builds a legal hand of cards of the same suit.
 suitDeck :: Suit -> Hand
 suitDeck suit = foldr (<+) Empty hands
                 where ranks =  [Jack, Queen, King, Ace] ++
@@ -99,60 +102,80 @@ suitDeck suit = foldr (<+) Empty hands
                       cards = [Card rank suit | rank <- ranks]
                       hands = [Add card Empty | card <- cards]
 
--- Function fullDeck
+-- Function fullDeck: Stacks legal hands into a legal deck.
 fullDeck :: Hand
-fullDeck = suitDeck Hearts <+ suitDeck Spades <+ suitDeck Diamonds <+ suitDeck Clubs
+fullDeck =  suitDeck Hearts <+
+            suitDeck Spades <+
+            suitDeck Diamonds <+
+            suitDeck Clubs
 
 -- Function draw: Given a deck and a hand, draw one card from the deck and
 -- put on the hand. Return both the deck and the hand (in that order).
 draw :: Hand -> Hand -> (Hand,Hand)
-draw Empty hand = error "draw: The deck is empty."
+draw Empty hand           = error "draw: The deck is empty."
 draw (Add card deck) hand = (deck, (Add card hand) )
 
 -- Function playBank: Given a deck, play for the bank according to the rules
 -- above (starting with an empty hand), and return the bank’s final hand:
 playBank :: Hand -> Hand
 playBank d = drawCard d Empty
-  where drawCard deck hand | value hand >=16 = hand
-                           | otherwise       = drawCard (fst t) (snd t) 
+  where drawCard deck hand | value hand >= 16 = hand
+                           | otherwise       = drawCard (fst t) (snd t)
                                                where t = draw deck hand
-
+-- Function shuffle: Given a StdGen and a hand of cards, shuffle the cards
+-- and return the shuffled hand:
 shuffle :: StdGen -> Hand -> Hand
 shuffle g deck = buildDeck Empty g deck
 
+-- Function buildDeck: Builds a deck by taking random cards from another
+-- deck. As the original deck gets depleted, the new deck is built by
+-- takin a random card from the original deck and moving it to the deck
+-- that is going to be returned.
 buildDeck :: Hand -> StdGen -> Hand -> Hand
-buildDeck newDeck g deck | size deck == 0 = newDeck
-                         | otherwise      = buildDeck (Add card' newDeck) g' deck'
-                                            where (number, g')   = randomNumber g deck
-                                                  (card', deck') = drawNthCard number deck
+buildDeck newDeck g deck
+  | size deck == 0 = newDeck
+  | otherwise      = buildDeck (Add card' newDeck) g' deck'
+                      where (number, g')   = randomNumber g deck
+                            (card', deck') = drawNthCard number deck
 
+-- Function randomNumber: Generates a random number between 0 and the size of
+-- the hand.
 randomNumber :: StdGen -> Hand -> (Integer, StdGen)
 randomNumber g deck = randomR (0, (size deck) - 1) g
 
-
+-- Function drawNthCard: Takes out tge nth card from a hand.
 drawNthCard :: Integer -> Hand -> (Card, Hand)
 drawNthCard n h | n < 0 || n >= size h = error "out of index"
-drawNthCard n h = iterHand h 0 Empty where
-  iterHand (Add card hand) iter checkedStack | iter == n = (card, checkedStack <+ hand)
-                                             | otherwise = iterHand hand (iter + 1) (Add card checkedStack)
+drawNthCard n h = iterHand h 0 Empty
+  where
+    iterHand (Add card hand) iter checkedStack
+      | iter == n = (card, checkedStack <+ hand) -- nth card is picked
+      -- and the checked cards are stacked onto the original hand.
+      -- Continues iterating and adds the current card to the already
+      -- checked stack
+      | otherwise = iterHand hand (iter + 1) (Add card checkedStack)
 
+-- TESTS: tests if a shuffle contains the same card.
 prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool
 prop_shuffle_sameCards g c h =
     c `belongsTo` h == c `belongsTo` shuffle g h
 
+-- Function belongsTo: tests if a card is on a hand.
 belongsTo :: Card -> Hand -> Bool
 c `belongsTo` Empty      = False
 c `belongsTo` (Add c' h) = (c == c') || (c `belongsTo` h)
 
+-- TEST: Tests that the size of the hands is the same.
 prop_size_shuffle :: StdGen -> Hand -> Bool
 prop_size_shuffle g h = size h == size (shuffle g h)
 
+-- Interface for the BlackJack
 implementation = Interface
   { iEmpty    = empty
   , iFullDeck = fullDeck
   , iValue    = value
   , iGameOver = gameOver
-  , iWinner   = winner 
+  , iWinner   = winner
   , iDraw     = draw
   , iPlayBank = playBank
   , iShuffle  = shuffle
