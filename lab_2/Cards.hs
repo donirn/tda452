@@ -6,7 +6,10 @@ import System.Random
 -- A card has a rank and belongs to a suit.
 
 data Card = Card { rank :: Rank, suit :: Suit }
-            deriving (Eq, Show)
+            deriving (Eq)
+
+instance Show Card where
+  show (Card r s) = show r++show s
 
 instance Arbitrary Card where
   arbitrary = do
@@ -17,7 +20,18 @@ instance Arbitrary Card where
 -- All the different suits.
 
 data Suit = Hearts | Spades | Diamonds | Clubs
-            deriving (Eq, Show)
+            deriving (Eq)
+
+instance Show Suit where
+  show Spades   = "♠"
+  show Hearts   = red++"♥"++normal
+  show Diamonds = red++"♦"++normal
+  show Clubs    = "♣"
+
+-- | ANSI color escape sequences
+red = "\ESC[31m"
+normal = "\ESC[m"
+
 
 instance Arbitrary Suit where
   arbitrary = oneof [ return Hearts, return Spades
@@ -27,7 +41,14 @@ instance Arbitrary Suit where
 -- numeric cards range from two to ten.
 
 data Rank = Numeric Integer | Jack | Queen | King | Ace
-            deriving (Eq, Show)
+            deriving (Eq)
+
+instance Show Rank where
+  show (Numeric n) = show n
+  show Jack = "J"
+  show Queen = "Q"
+  show King = "K"
+  show Ace = "A"
 
 instance Arbitrary Rank where
   arbitrary = frequency [ (1, return Jack)
@@ -42,10 +63,15 @@ instance Arbitrary Rank where
 -- deck of cards.
 
 data Hand = Empty | Add Card Hand
-            deriving (Eq, Show)
+            deriving (Eq)
 
 -- This instance on average yields larger hands than the one given in
 -- the lecture.
+
+
+instance Show Hand where
+  show Empty = "."
+  show (Add c h) = show c++" "++show h
 
 instance Arbitrary Hand where
   arbitrary = frequency [  (1,  return Empty)
