@@ -144,6 +144,9 @@ belongsTo :: Card -> Hand -> Bool
 c `belongsTo` Empty      = False
 c `belongsTo` (Add c' h) = (c == c') || (c `belongsTo` h)
 
+prop_size_shuffle :: StdGen -> Hand -> Bool
+prop_size_shuffle g h = size h == size (shuffle g h)
+
 ------------------------------------------------------------
 -- Tests
 card1 = Card (Numeric 3) Spades -- 10
