@@ -59,12 +59,15 @@ numberOfAces (Add _ hand)            = numberOfAces hand  -- any other
 -- whenever the base case is not the one to compute.
 value :: Hand -> Integer
 value Empty = 0
-value (Add card hand) =
-  let accumulatedValue = value hand + valueCard card
-  in if accumulatedValue > 21
-    -- Considers the value of an Ace as 1 i.e. substract 10 * number of aces.
-    then accumulatedValue - (numberOfAces (Add card hand) * 10)
-    else accumulatedValue
+value hand = finalValue hand (preValue hand)
+
+preValue :: Hand -> Integer
+preValue Empty           = 0
+preValue (Add card hand) = preValue hand + valueCard card
+
+finalValue :: Hand -> Integer -> Integer
+finalValue hand pValue | pValue > 21 = pValue - (numberOfAces hand * 10)
+                       | otherwise   = pValue
 
 -- Function gameOver: Basic game rule.
 gameOver :: Hand -> Bool
@@ -193,4 +196,4 @@ hand1 = (Add card3 (Add card2 (Add card1 Empty)))
 hand2 = (Add card3 (Add card3 Empty))
 
 cardTest = Card {rank = Numeric 2, suit = Spades}
-handTest = Add (Card {rank = King, suit = Spades}) Empty
+handTest = Add (Card {rank = Jack, suit = Spades}) (Add (Card {rank = Ace, suit = Diamonds}) (Add (Card {rank = Numeric 4, suit = Hearts}) (Add (Card {rank = Jack, suit = Hearts}) Empty)))
