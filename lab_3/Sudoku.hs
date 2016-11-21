@@ -41,16 +41,17 @@ getValue (Just e) = intToDigit e
 -- if the file did not contain a sudoku
 readSudoku :: FilePath -> IO Sudoku
 readSudoku filePath = do file <- readFile filePath
-                         txtRows <- lines file
-                         return Sudoku {rows = map lineToList txtRows}
+                         let txtRows = lines file
+                         let sud = Sudoku {rows = map lineToList txtRows}
+                         if (isSudoku sud) then return sud
+                         else error "Program error: Not a Sudoku!"
 
 lineToList :: String -> [Maybe Int]
 lineToList line = map getIntValue line
 
 getIntValue :: Char ->  Maybe Int
-getIntValue '.'                  = Nothing
-getIntValue  c | c `elem` ['1'..'9'] = Just (digitToInt c)
-               | otherwise           = error "Program error: Not a Sudoku!"
+getIntValue '.' = Nothing
+getIntValue  c  = Just (digitToInt c)
 
 -------------------------------------------------------------------------
 
