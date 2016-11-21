@@ -1,5 +1,5 @@
 module Sudoku where
-
+import Data.Maybe
 import Test.QuickCheck
 
 -------------------------------------------------------------------------
@@ -9,16 +9,22 @@ data Sudoku = Sudoku { rows :: [[Maybe Int]] }
 
 -- allBlankSudoku is a sudoku with just blanks
 allBlankSudoku :: Sudoku
-allBlankSudoku = undefined
+allBlankSudoku = Sudoku {rows = replicate 9 (replicate 9 Nothing)}
 
 -- isSudoku sud checks if sud is really a valid representation of a sudoku
 -- puzzle
 isSudoku :: Sudoku -> Bool
-isSudoku = undefined
+isSudoku sud = length (rows sud) == 9 
+                && and (map (\r -> length r == 9 && 
+                                and (map isSudokuElement r)) (rows sud))
+
+isSudokuElement :: Maybe Int -> Bool
+isSudokuElement Nothing  = True
+isSudokuElement (Just e) = e `elem` [1..9]
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved = undefined
+isSolved sud = and ( map (\r -> and (map (\e -> not (isNothing e)) r )) (rows sud))
 
 -------------------------------------------------------------------------
 
