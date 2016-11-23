@@ -120,8 +120,8 @@ draw (Add card deck) hand = (deck, (Add card hand) )
 playBank :: Hand -> Hand
 playBank d = drawCard d Empty
   where drawCard deck hand | value hand >= 16 = hand
-                           | otherwise       = drawCard (fst t) (snd t)
-                                               where t = draw deck hand
+                           | otherwise       = drawCard deck' hand'
+                                               where (deck', hand') = draw deck hand
 -- Function shuffle: Given a StdGen and a hand of cards, shuffle the cards
 -- and return the shuffled hand:
 shuffle :: StdGen -> Hand -> Hand
@@ -135,13 +135,8 @@ buildDeck :: Hand -> StdGen -> Hand -> Hand
 buildDeck newDeck g deck
   | size deck == 0 = newDeck
   | otherwise      = buildDeck (Add card' newDeck) g' deck'
-                      where (number, g')   = randomNumber g deck
+                      where (number, g')   = randomR (0, (size deck) - 1) g
                             (card', deck') = drawNthCard number deck
-
--- Function randomNumber: Generates a random number between 0 and the size of
--- the hand.
-randomNumber :: StdGen -> Hand -> (Integer, StdGen)
-randomNumber g deck = randomR (0, (size deck) - 1) g
 
 -- Function drawNthCard: Takes out tge nth card from a hand.
 drawNthCard :: Integer -> Hand -> (Card, Hand)
