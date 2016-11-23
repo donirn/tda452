@@ -106,13 +106,12 @@ getBlocks rows =  takeFirstBlock rows : getBlocks (dropFirstBlock rows)
 
 -- Function takeFirstBlock: Takes the top-left 3x3 block.
 takeFirstBlock :: [[Maybe Int]] -> Block
-takeFirstBlock rows = take 3 (rows!!0) ++ take 3 (rows!!1) ++ take 3 (rows!!2)
+takeFirstBlock rows =  concat (map (take 3) (take 3 rows))
 
 -- Function dropFirstBlock: Drops the top-left 3x3 block.
 dropFirstBlock :: [[Maybe Int]] -> [[Maybe Int]]
-dropFirstBlock rows | length (rows!!0) == 3 = drop 3 rows
-                    | otherwise             = [drop 3 (rows!!0), drop 3 (rows!!1), drop 3 (rows!!2)]
-                                                  ++ drop 3 rows
+dropFirstBlock rows = filter (\x -> length x > 0) (map (drop 3) (take 3 rows))
+                    ++ drop 3 rows
 
 -- Function isOkay: Checks that all the relevant regions are correct and henceforth
 -- the Sudoku is a valid one.
