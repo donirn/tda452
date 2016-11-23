@@ -1,7 +1,11 @@
 module Sudoku where
 import Data.Maybe
 import Test.QuickCheck
+import Test.QuickCheck.Gen
 import Data.Char
+import System.Random
+import Control.Monad
+import Data.List
 -------------------------------------------------------------------------
 
 data Sudoku = Sudoku { rows :: [[Maybe Int]] }
@@ -53,11 +57,12 @@ getIntValue :: Char ->  Maybe Int
 getIntValue '.' = Nothing
 getIntValue  c  = Just (digitToInt c)
 
+
 -------------------------------------------------------------------------
 
 -- cell generates an arbitrary cell in a Sudoku
 cell :: Gen (Maybe Int)
-cell = undefined
+cell = frequency [(1, liftM Just (choose (1,9))), (9, return Nothing)]
 
 -- an instance for generating Arbitrary Sudokus
 instance Arbitrary Sudoku where
@@ -65,4 +70,18 @@ instance Arbitrary Sudoku where
     do rows <- sequence [ sequence [ cell | j <- [1..9] ] | i <- [1..9] ]
        return (Sudoku rows)
 
+prop_Sudoku :: Sudoku -> Bool
+prop_Sudoku sud = isSudoku sud
 -------------------------------------------------------------------------
+-- given a block, checks if that block does not contain the same digit twice.
+
+type Block = [Maybe Int]
+
+isOkayBlock :: Block -> Bool
+isOkayBlock blk = length (nubBy (\x y -> x /= Nothing &&  x == y) blk) == 9
+
+blockCorrectInstance :: Block
+blockCorrectInstance = [Just 1, Just 2, Nothing, Nothing, Just 3, Nothing, Nothing, Nothing, Just 4]
+
+blockIncorrectInstance :: Block
+blockIncorrectInstance = [Just 1, Just 1, Nothing, Nothing, Just 3, Nothing, Nothing, Nothing, Just 4]
