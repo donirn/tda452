@@ -1,12 +1,7 @@
 module Sudoku where
 import Data.Maybe
 import Test.QuickCheck
-import Test.QuickCheck.Gen
 import Data.Char
-import System.Random
-import Control.Monad
-import Data.List
---import Data.Matrix
 -------------------------------------------------------------------------
 
 data Sudoku = Sudoku { rows :: [[Maybe Int]] }
@@ -46,24 +41,14 @@ getValue (Just e) = intToDigit e
 -- if the file did not contain a sudoku
 readSudoku :: FilePath -> IO Sudoku
 readSudoku filePath = do file <- readFile filePath
-                         let txtRows = lines file
-                         let sud = Sudoku {rows = map lineToList txtRows}
-                         if (isSudoku sud) then return sud
-                         else error "Program error: Not a Sudoku!"
-
-lineToList :: String -> [Maybe Int]
-lineToList line = map getIntValue line
-
-getIntValue :: Char ->  Maybe Int
-getIntValue '.' = Nothing
-getIntValue  c  = Just (digitToInt c)
+                         l <- lines file
 
 
 -------------------------------------------------------------------------
 
 -- cell generates an arbitrary cell in a Sudoku
 cell :: Gen (Maybe Int)
-cell = frequency [(1, liftM Just (choose (1,9))), (9, return Nothing)]
+cell = undefined
 
 -- an instance for generating Arbitrary Sudokus
 instance Arbitrary Sudoku where
@@ -71,38 +56,4 @@ instance Arbitrary Sudoku where
     do rows <- sequence [ sequence [ cell | j <- [1..9] ] | i <- [1..9] ]
        return (Sudoku rows)
 
-prop_Sudoku :: Sudoku -> Bool
-prop_Sudoku sud = isSudoku sud
 -------------------------------------------------------------------------
--- given a block, checks if that block does not contain the same digit twice.
-
-type Block = [Maybe Int]
-
-isOkayBlock :: Block -> Bool
-isOkayBlock blk = length (nubBy (\x y -> x /= Nothing &&  x == y) blk) == 9
-
-blockCorrectInstance :: Block
-blockCorrectInstance = [Just 1, Just 2, Nothing, Nothing, Just 3, Nothing, Nothing, Nothing, Just 4]
-
-blockIncorrectInstance :: Block
-blockIncorrectInstance = [Just 1, Just 1, Nothing, Nothing, Just 3, Nothing, Nothing, Nothing, Just 4]
-
--------------------------------------------------------------------------
---
-
-
-blocks :: Sudoku -> [Block]
-blocks sud = rows sud ++ transpose (rows sud) ++ getBlocks (rows sud) 0 []
-
--- take rows
-getBlocks :: [[Maybe Int]] -> Int -> [Block] -> [Block]
-getBlocks _ 9 blocks      = blocks
-getBlocks rows iter blocks = getBlocks (dropFirstBlock rows) (iter+1) (takeFirstBlock rows : blocks)
-
--- take top-left 3x3 block
-takeFirstBlock :: [[Maybe Int]] -> Block
-takeFirstBlock rows = take 3 (rows!!0) ++ take 3 (rows!!1) ++ take 3 (rows!!2)
-
--- drop top-left 3x3 block
-dropFirstBlock :: [[Maybe Int]] -> [[Maybe Int]]
-dropFirstBlock rows = [drop 3 (rows!!0), drop 3 (rows!!1), drop 3 (rows!!2)] ++ drop 3 rows
