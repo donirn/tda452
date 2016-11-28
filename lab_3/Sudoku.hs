@@ -106,7 +106,7 @@ getBlocks rows =  takeFirstBlock rows : getBlocks (dropFirstBlock rows)
 
 -- Function takeFirstBlock: Takes the top-left 3x3 block.
 takeFirstBlock :: [[Maybe Int]] -> Block
-takeFirstBlock rows =  concat (map (take 3) (take 3 rows))
+takeFirstBlock rows = concat (map (take 3) (take 3 rows))
 
 -- Function dropFirstBlock: Drops the top-left 3x3 block.
 dropFirstBlock :: [[Maybe Int]] -> [[Maybe Int]]
@@ -117,3 +117,17 @@ dropFirstBlock rows = filter (\x -> length x > 0) (map (drop 3) (take 3 rows))
 -- the Sudoku is a valid one.
 isOkay :: Sudoku -> Bool
 isOkay sud = and (map isOkayBlock (blocks sud))
+
+-------------------------------------------------------------------------
+-- Assignment E
+type Pos = (Int,Int)
+
+blanks :: Sudoku -> [Pos]
+blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c]) [0..8] (map (\r -> elemIndices Nothing r) (rows sud)))
+
+(!!=) :: [a] -> (Int,a) -> [a]
+(x:xs) !!= (i,v) | i == 0    = v:xs
+                 | otherwise = x:(xs !!= (i-1,v))
+
+update :: Sudoku -> Pos -> Maybe Int -> Sudoku
+update sud (row,col) v = Sudoku {rows= rows sud}
