@@ -97,12 +97,12 @@ isOkayBlock blk = length (nubBy (\x y -> x /= Nothing &&  x == y) blk) == 9
 blocks :: Sudoku -> [Block]
 blocks sud = rows sud -- Rows
              ++ transpose (rows sud) -- Columns
-             ++ getBlocks (rows sud) -- 3x3 Squares or 'blocks'
+             ++ get3x3Blocks (rows sud) -- 3x3 Squares or 'blocks'
 
--- Function getBlocks: Build 3x3 regions from Sudoku's elements.
-getBlocks :: [[Maybe Int]] -> [Block]
-getBlocks []   = []
-getBlocks rows =  takeFirstBlock rows : getBlocks (dropFirstBlock rows)
+-- Function get3x3Blocks: Build 3x3 regions from Sudoku's elements.
+get3x3Blocks :: [[Maybe Int]] -> [Block]
+get3x3Blocks []   = []
+get3x3Blocks rows =  takeFirstBlock rows : get3x3Blocks (dropFirstBlock rows)
 
 -- Function takeFirstBlock: Takes the top-left 3x3 block.
 takeFirstBlock :: [[Maybe Int]] -> Block
@@ -140,3 +140,12 @@ update :: Sudoku -> Pos -> Maybe Int -> Sudoku
 update sud (rowInd,colInd) newVal =
   Sudoku { rows = ((rows sud) !!= (rowInd, newRow)) }
     where newRow = ((rows sud)!!rowInd) !!= (colInd, newVal)
+
+
+-- Function candidates : Given a Sudoku, and a blank position, determines
+-- which numbers could be legally written into that position.
+candidates :: Sudoku -> Pos -> [Int]
+candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
+  where relatedBlocks = allBlocks!!rowInd ++ allBlocks!!(9+colInd)
+                        ++ allBlocks!!(18 + (rowInd `div` 3)*3 + (colInd `div` 3))
+        allBlocks = blocks sud
