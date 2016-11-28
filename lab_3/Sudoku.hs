@@ -1,11 +1,11 @@
 module Sudoku where
-import Data.Maybe
-import Test.QuickCheck
-import Test.QuickCheck.Gen
-import Data.Char
-import System.Random
-import Control.Monad
-import Data.List
+import           Control.Monad
+import           Data.Char
+import           Data.List
+import           Data.Maybe
+import           System.Random
+import           Test.QuickCheck
+import           Test.QuickCheck.Gen
 
 -------------------------------------------------------------------------
 -- Assignment A
@@ -43,7 +43,7 @@ printSudoku sud = mapM_ (\r -> putStrLn (map fromInt r)) (rows sud)
 
 -- Function fromInt: Converts a Maybe Int to a char
 fromInt :: Maybe Int -> Char
-fromInt Nothing = '.'
+fromInt Nothing  = '.'
 fromInt (Just e) = intToDigit e
 
 -- Function readSudoku: Reads a Sudoku from the file, and either delivers it,
@@ -101,7 +101,7 @@ blocks sud = rows sud -- Rows
 
 -- Function getBlocks: Build 3x3 regions from Sudoku's elements.
 getBlocks :: [[Maybe Int]] -> [Block]
-getBlocks [] = []
+getBlocks []   = []
 getBlocks rows =  takeFirstBlock rows : getBlocks (dropFirstBlock rows)
 
 -- Function takeFirstBlock: Takes the top-left 3x3 block.
@@ -123,11 +123,20 @@ isOkay sud = and (map isOkayBlock (blocks sud))
 type Pos = (Int,Int)
 
 blanks :: Sudoku -> [Pos]
-blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c]) [0..8] (map (\r -> elemIndices Nothing r) (rows sud)))
+blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c])
+                              [0..8]
+                              (map (\r -> elemIndices Nothing r) (rows sud)))
 
+-- Function (!!=) : Given a list, and a tuple containing an index in the list
+-- and a new value, updates the given list with the new value at the given
+-- index.
 (!!=) :: [a] -> (Int,a) -> [a]
 (x:xs) !!= (i,v) | i == 0    = v:xs
                  | otherwise = x:(xs !!= (i-1,v))
 
+-- Function update: Given a Sudoku, a position, and a new cell value, updates
+-- the given Sudoku at the given position with the new value.
 update :: Sudoku -> Pos -> Maybe Int -> Sudoku
-update sud (row,col) v = Sudoku {rows= rows sud}
+update sud (rowInd,colInd) newVal =
+  Sudoku { rows = ((rows sud) !!= (rowInd, newRow)) }
+    where newRow = ((rows sud)!!rowInd) !!= (colInd, newVal)
