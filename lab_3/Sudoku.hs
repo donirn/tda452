@@ -1,6 +1,7 @@
 module Sudoku where
 import           Control.Monad
 import           Data.Char
+--import           Data.Generics.Aliases
 import           Data.List
 import           Data.Maybe
 import           System.Random
@@ -149,3 +150,26 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
   where relatedBlocks = allBlocks!!rowInd ++ allBlocks!!(9+colInd)
                         ++ allBlocks!!(18 + (rowInd `div` 3)*3 + (colInd `div` 3))
         allBlocks = blocks sud
+-- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
+-- have a solution.
+solve :: Sudoku -> Maybe Sudoku
+solve sud | not( isSudoku sud && isOkay sud)  = Nothing
+          | otherwise                         = solve' sud (blanks sud)
+
+-- Function solve: Solves a Sudoku.
+solve' :: Sudoku -> [Pos] -> Maybe Sudoku
+solve' sud []        = Nothing
+solve' sud (pos:xs)  = (solveForCandidates sud pos (candidates sud pos)) `orElse`
+                       (solve' sud xs)
+-- sudoku x position x list of candidates
+solveForCandidates :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
+solveForCandidates sud pos [] = Nothing
+solveForCandidates sud pos (x:xs) =
+                                if  isSolved updatedSudoku
+                                  then (Just updatedSudoku)
+                                  else solve' updatedSudoku (blanks updatedSudoku) `orElse` solveForCandidates sud pos xs
+                                    where updatedSudoku = update sud pos (Just x)
+
+orElse :: Maybe a -> Maybe a -> Maybe a
+orElse (Just x) _ = Just x
+orElse _        y = y
