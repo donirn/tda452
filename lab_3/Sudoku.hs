@@ -176,3 +176,12 @@ solve' sud pos (x:xs)
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse (Just x) _ = Just x
 orElse _        y = y
+
+-- Function readAndSolve: Produces instructions for reading the Sudoku from
+-- the given file, solving it, and printing the answer.
+readAndSolve :: FilePath -> IO ()
+readAndSolve filePath = do sud <- readSudoku filePath
+                           let solution = solve sud
+                           if isJust solution then
+                             printSudoku (fromJust solution)
+                             else putStrLn "(no solution)"
