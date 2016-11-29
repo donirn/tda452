@@ -132,6 +132,12 @@ blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c])
                               [0..8]
                               (map (\r -> elemIndices Nothing r) (rows sud)))
 
+-- Checks that that all cells in the blanks list are actually blank.
+prop_allCellsAreBlank :: Sudoku -> Bool
+prop_allCellsAreBlank sud =
+                            and (map (\(x,y) ->
+                              (rows sud)!!x!!y == Nothing) (blanks sud))
+
 -- Function (!!=) : Given a list, and a tuple containing an index in the list
 -- and a new value, updates the given list with the new value at the given
 -- index.
@@ -197,3 +203,8 @@ isSolutionOf first second = isSolved first && isOkay first && checkSol
                     and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
                         (rows first)
                         (rows second))
+
+-- prop_SolveSound: Tests that every supposed solution produced by solve
+-- actually is a valid solution of the original problem.
+prop_SolveSound :: Sudoku -> Bool
+prop_SolveSound sud = fromJust (solve sud) `isSolutionOf` sud
