@@ -159,27 +159,19 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
 solve sud | not( isSudoku sud && isOkay sud)  = Nothing
-          | isSolved sud                      = Just sud
-          | otherwise                         = solve' sud (blanks sud)
-
---solve' sud pos (candidates sud pos)
---where pos = head(blanks(sud))
-
---solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
+          | otherwise                         = solve' sud pos (candidates sud pos)
+                                                  where pos = (head (blanks sud))
 
 -- Function solve: Solves a Sudoku.
-solve' :: Sudoku -> [Pos] -> Maybe Sudoku
-solve' sud []        = Just sud
-solve' sud (pos:xs)  = (solveForCandidates sud pos (candidates sud pos))
-
--- sudoku x position x list of candidates
-solveForCandidates :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
-solveForCandidates sud pos [] = Nothing
-solveForCandidates sud pos (x:xs) =
-                                if  isSolved updatedSudoku
-                                  then (Just updatedSudoku)
-                                  else solve' updatedSudoku (blanks updatedSudoku) `orElse` solveForCandidates sud pos xs
-                                    where updatedSudoku = update sud pos (Just x)
+solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
+solve' sud pos [] = Nothing
+solve' sud pos (x:xs) =
+                      if  isSolved updatedSudoku
+                        then (Just updatedSudoku)
+                        else solve' updatedSudoku pos' (candidates updatedSudoku pos')
+                            `orElse` solve' sud pos xs
+                          where updatedSudoku = update sud pos (Just x)
+                                pos' = head (blanks updatedSudoku)
 
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse (Just x) _ = Just x
