@@ -145,6 +145,12 @@ prop_allCellsAreBlank sud =
 (x:xs) !!= (i,v) | i == 0    = v:xs
                  | otherwise = x:(xs !!= (i-1,v))
 
+--prop_replace :: [a] -> (Int,a) -> Bool
+--prop_replace l (i,v) | 0 <= i  <length(l) = True
+--
+--prop_correct_lenght
+
+
 -- Function update: Given a Sudoku, a position, and a new cell value, updates
 -- the given Sudoku at the given position with the new value.
 update :: Sudoku -> Pos -> Maybe Int -> Sudoku
@@ -208,3 +214,7 @@ isSolutionOf first second = isSolved first && isOkay first && checkSol
 -- actually is a valid solution of the original problem.
 prop_SolveSound :: Sudoku -> Bool
 prop_SolveSound sud = fromJust (solve sud) `isSolutionOf` sud
+
+-- TODO
+-- DONI  -> E3, E4
+-- JP    -> E2
