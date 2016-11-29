@@ -87,14 +87,16 @@ prop_Sudoku sud = isSudoku sud
 -- Assignment D
 type Block = [Maybe Int]
 
--- Function isOkayBlock: given a block, checks if that block does not contain the same digit twice.
+-- Function isOkayBlock: given a block, checks if that block does not contain
+-- the same digit twice.
 isOkayBlock :: Block -> Bool
-isOkayBlock blk = length (nubBy (\x y -> x /= Nothing &&  x == y) blk) == 9
-                    -- after removing the duplicates the length should be legal
+isOkayBlock blk =
+              length (nubBy (\x y -> x /= Nothing &&  x == y) blk) == 9
+              -- after removing the duplicates the length should be legal
 
--- Function Blocks: Extract lists representing the cell regions to be considered
--- when deciding over the correctness of a solution. (i.e. rows, columns and 3x3
--- squares)
+-- Function Blocks: Extract lists representing the cell regions to be
+-- considered when deciding over the correctness of a solution. (i.e. rows,
+-- columns and 3x3 squares)
 blocks :: Sudoku -> [Block]
 blocks sud = rows sud -- Rows
              ++ transpose (rows sud) -- Columns
@@ -103,7 +105,8 @@ blocks sud = rows sud -- Rows
 -- Function get3x3Blocks: Build 3x3 regions from Sudoku's elements.
 get3x3Blocks :: [[Maybe Int]] -> [Block]
 get3x3Blocks []   = []
-get3x3Blocks rows =  takeFirstBlock rows : get3x3Blocks (dropFirstBlock rows)
+get3x3Blocks rows =  takeFirstBlock rows :
+                        get3x3Blocks (dropFirstBlock rows)
 
 -- Function takeFirstBlock: Takes the top-left 3x3 block.
 takeFirstBlock :: [[Maybe Int]] -> Block
@@ -111,11 +114,12 @@ takeFirstBlock rows = concat (map (take 3) (take 3 rows))
 
 -- Function dropFirstBlock: Drops the top-left 3x3 block.
 dropFirstBlock :: [[Maybe Int]] -> [[Maybe Int]]
-dropFirstBlock rows = filter (\x -> length x > 0) (map (drop 3) (take 3 rows))
-                    ++ drop 3 rows
+dropFirstBlock rows = filter (\x -> length x > 0)
+                              (map (drop 3) (take 3 rows))
+                      ++ drop 3 rows
 
--- Function isOkay: Checks that all the relevant regions are correct and henceforth
--- the Sudoku is a valid one.
+-- Function isOkay: Checks that all the relevant regions are correct and
+-- henceforth the Sudoku is a valid one.
 isOkay :: Sudoku -> Bool
 isOkay sud = and (map isOkayBlock (blocks sud))
 
@@ -147,8 +151,9 @@ update sud (rowInd,colInd) newVal =
 -- which numbers could be legally written into that position.
 candidates :: Sudoku -> Pos -> [Int]
 candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
-  where relatedBlocks = allBlocks!!rowInd ++ allBlocks!!(9+colInd)
-                        ++ allBlocks!!(18 + (rowInd `div` 3)*3 + (colInd `div` 3))
+  where relatedBlocks = allBlocks!!rowInd ++ allBlocks!!(9 + colInd)
+                        ++ allBlocks!!(18 + (rowInd `div` 3)*3 +
+                                        (colInd `div` 3))
         allBlocks = blocks sud
 -- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
 -- have a solution.
