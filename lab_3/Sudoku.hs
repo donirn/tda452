@@ -185,3 +185,15 @@ readAndSolve filePath = do sud <- readSudoku filePath
                            if isJust solution then
                              printSudoku (fromJust solution)
                              else putStrLn "(no solution)"
+
+
+-- Function isSolutionOf: Checks, given two Sudokus, whether the first one is
+-- a solution (i.e. all blocks are okay, there are no blanks), and also
+-- whether the first one is a solution of the second one (i.e. all digits in
+-- the second sudoku are maintained in the first one).
+isSolutionOf :: Sudoku -> Sudoku -> Bool
+isSolutionOf first second = isSolved first && isOkay first && checkSol
+  where checkSol = and (zipWith (\fr sr ->
+                    and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
+                        (rows first)
+                        (rows second))
