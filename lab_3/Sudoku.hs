@@ -154,13 +154,19 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
 solve sud | not( isSudoku sud && isOkay sud)  = Nothing
+          | isSolved sud                      = Just sud
           | otherwise                         = solve' sud (blanks sud)
+
+--solve' sud pos (candidates sud pos)
+--where pos = head(blanks(sud))
+
+--solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
 
 -- Function solve: Solves a Sudoku.
 solve' :: Sudoku -> [Pos] -> Maybe Sudoku
-solve' sud []        = Nothing
-solve' sud (pos:xs)  = (solveForCandidates sud pos (candidates sud pos)) `orElse`
-                       (solve' sud xs)
+solve' sud []        = Just sud
+solve' sud (pos:xs)  = (solveForCandidates sud pos (candidates sud pos))
+
 -- sudoku x position x list of candidates
 solveForCandidates :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
 solveForCandidates sud pos [] = Nothing
