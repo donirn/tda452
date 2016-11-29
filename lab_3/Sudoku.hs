@@ -155,6 +155,7 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
                         ++ allBlocks!!(18 + (rowInd `div` 3)*3 +
                                         (colInd `div` 3))
         allBlocks = blocks sud
+
 -- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
@@ -165,13 +166,12 @@ solve sud | not( isSudoku sud && isOkay sud)  = Nothing
 -- Function solve: Solves a Sudoku.
 solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
 solve' sud pos [] = Nothing
-solve' sud pos (x:xs) =
-                      if  isSolved updatedSudoku
-                        then (Just updatedSudoku)
-                        else solve' updatedSudoku pos' (candidates updatedSudoku pos')
-                            `orElse` solve' sud pos xs
-                          where updatedSudoku = update sud pos (Just x)
-                                pos' = head (blanks updatedSudoku)
+solve' sud pos (x:xs)
+                | isSolved sud' = Just sud'
+                | otherwise     = solve' sud' pos' (candidates sud' pos')
+                                    `orElse` solve' sud pos xs
+                  where sud' = update sud pos (Just x)
+                        pos' = head (blanks sud')
 
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse (Just x) _ = Just x
