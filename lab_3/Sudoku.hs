@@ -189,6 +189,9 @@ prop_candidates sud pos = and(map checkCandidate (candidates sud pos))
     where checkCandidate c = isOkay (sud' c) && isSudoku (sud' c)
           sud' c = update sud pos (Just c)
 
+-------------------------------------------------------------------------
+-- Assignment F
+
 -- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
