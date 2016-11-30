@@ -158,6 +158,14 @@ update sud (rowInd,colInd) newVal =
   Sudoku { rows = ((rows sud) !!= (rowInd, newRow)) }
     where newRow = ((rows sud)!!rowInd) !!= (colInd, newVal)
 
+prop_update :: Sudoku -> Pos -> Maybe Int -> Bool
+prop_update _ pos _ | not (inSudoku pos) = True
+prop_update sud (row,col) val = (rows (update sud (row,col) val))!!row!!col == val
+
+inSudoku :: Pos -> Bool
+inSudoku (row, col) | row < 0  || col < 0  = False
+                    | row >= 9 || col >= 9 = False
+                    | otherwise            = True
 
 -- Function candidates : Given a Sudoku, and a blank position, determines
 -- which numbers could be legally written into that position.
