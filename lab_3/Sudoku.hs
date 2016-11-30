@@ -145,6 +145,7 @@ prop_allCellsAreBlank sud =
 (x:xs) !!= (i,v) | i == 0     = v:xs
                  | otherwise  = x:(xs !!= (i-1,v))
 
+-- Function prop_replace : Checks if the element is actually updated
 prop_replace :: (Eq a) => [a] -> (Int,a) -> Bool
 prop_replace [] (_,_) = True
 prop_replace l (i,v) | (0 <= i && i < length(l)) = (l !!= (i,v))!!i == v
@@ -158,6 +159,8 @@ update sud (rowInd,colInd) newVal =
   Sudoku { rows = ((rows sud) !!= (rowInd, newRow)) }
     where newRow = ((rows sud)!!rowInd) !!= (colInd, newVal)
 
+-- Function prop_update : checks that the updated position really has gotten 
+-- the new value.
 prop_update :: Sudoku -> Pos -> Maybe Int -> Bool
 prop_update _ pos _ | not (inSudoku pos) = True
 prop_update sud (row,col) val = (rows (update sud (row,col) val))!!row!!col == val
@@ -176,6 +179,8 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
                                         (colInd `div` 3))
         allBlocks = blocks sud
 
+-- Function prop_candidates : Check that updating with given candidates are
+-- actually okay based on the check on isSudoku and isOkay
 prop_candidates :: Sudoku -> Pos -> Bool
 prop_candidates _ pos | not (inSudoku pos) = True
 prop_candidates sud _ | not (isOkay sud && isSudoku sud) = True
