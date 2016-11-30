@@ -142,13 +142,15 @@ prop_allCellsAreBlank sud =
 -- and a new value, updates the given list with the new value at the given
 -- index.
 (!!=) :: [a] -> (Int,a) -> [a]
-(x:xs) !!= (i,v) | i == 0    = v:xs
-                 | otherwise = x:(xs !!= (i-1,v))
+(x:xs) !!= (i,v) | i == 0     = v:xs
+                 | otherwise  = x:(xs !!= (i-1,v))
+[] !!= (i,v)     | i == 0     = [v]
+                 | otherwise  =
+                            error "Wrong index when inserting on empty list"
 
---prop_replace :: [a] -> (Int,a) -> Bool
---prop_replace l (i,v) | 0 <= i  <length(l) = True
---
---prop_correct_lenght
+prop_update :: (Eq a) => [a] -> (Int,a) -> Bool
+prop_update l (i,v)   | (0 <= i && i <= length(l)) = (l !!= (i,v))!!i == v
+                      | otherwise = True
 
 
 -- Function update: Given a Sudoku, a position, and a new cell value, updates
@@ -217,4 +219,3 @@ prop_SolveSound sud = fromJust (solve sud) `isSolutionOf` sud
 
 -- TODO
 -- DONI  -> E3, E4
--- JP    -> E2
