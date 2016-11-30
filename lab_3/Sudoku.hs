@@ -7,6 +7,7 @@ import           Data.Maybe
 import           System.Random
 import           Test.QuickCheck
 import           Test.QuickCheck.Gen
+import           Test.QuickCheck.Property
 
 -------------------------------------------------------------------------
 -- Assignment A
@@ -232,8 +233,15 @@ isSolutionOf first second = isSolved first && isOkay first && checkSol
 
 -- prop_SolveSound: Tests that every supposed solution produced by solve
 -- actually is a valid solution of the original problem.
-prop_SolveSound :: Sudoku -> Bool
-prop_SolveSound sud = fromJust (solve sud) `isSolutionOf` sud
+prop_SolveSound :: Sudoku -> Property
+prop_SolveSound sud | not (isOkay sud && isSudoku sud) = property True
+prop_SolveSound sud | isNothing solvedSud = property True
+                    | otherwise = property (fromJust solvedSud `isSolutionOf` sud)
+                    where solvedSud = solve sud
+
+-- use fewer tests when using quickCheck
+fewerChecks :: Testable prop => prop -> IO ()
+fewerChecks prop = quickCheckWith stdArgs{ maxSuccess = 30 } prop
 
 -- TODO
 -- DONI  -> E3, E4
