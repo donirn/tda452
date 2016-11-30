@@ -135,8 +135,7 @@ blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c])
 
 -- Checks that that all cells in the blanks list are actually blank.
 prop_allCellsAreBlank :: Sudoku -> Bool
-prop_allCellsAreBlank sud =
-                            and (map (\(x,y) ->
+prop_allCellsAreBlank sud = and (map (\(x,y) ->
                               (rows sud)!!x!!y == Nothing) (blanks sud))
 
 -- Function (!!=) : Given a list, and a tuple containing an index in the list
@@ -201,13 +200,13 @@ solve sud | not( isSudoku sud && isOkay sud)  = Nothing
 
 -- Function solve: Solves a Sudoku.
 solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
-solve' sud pos [] = Nothing
+solve' _ _ [] = Nothing
 solve' sud pos (x:xs)
-                | isSolved sud' = Just sud'
-                | otherwise     = solve' sud' pos' (candidates sud' pos')
-                                    `orElse` solve' sud pos xs
-                  where sud' = update sud pos (Just x)
-                        pos' = head (blanks sud')
+    | isSolved sud' = Just sud'
+    | otherwise     = solve' sud' pos' (candidates sud' pos')
+                      `orElse` solve' sud pos xs
+    where sud' = update sud pos (Just x)
+          pos' = head (blanks sud')
 
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse (Just x) _ = Just x
@@ -220,7 +219,7 @@ readAndSolve filePath = do sud <- readSudoku filePath
                            let solution = solve sud
                            if isJust solution then
                              printSudoku (fromJust solution)
-                             else putStrLn "(no solution)"
+                           else putStrLn "(no solution)"
 
 
 -- Function isSolutionOf: Checks, given two Sudokus, whether the first one is
@@ -229,8 +228,8 @@ readAndSolve filePath = do sud <- readSudoku filePath
 -- the second sudoku are maintained in the first one).
 isSolutionOf :: Sudoku -> Sudoku -> Bool
 isSolutionOf first second = isSolved first && isOkay first && checkSol
-  where checkSol = and (zipWith (\fr sr ->
-                    and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
+    where checkSol = and (zipWith (\fr sr ->
+                        and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
                         (rows first)
                         (rows second))
 
