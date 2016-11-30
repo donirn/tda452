@@ -242,6 +242,3 @@ prop_SolveSound sud | isNothing solvedSud = property True
 -- use fewer tests when using quickCheck
 fewerChecks :: Testable prop => prop -> IO ()
 fewerChecks prop = quickCheckWith stdArgs{ maxSuccess = 30 } prop
-
--- TODO
--- DONI  -> E3, E4
