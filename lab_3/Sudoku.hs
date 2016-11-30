@@ -176,6 +176,13 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
                                         (colInd `div` 3))
         allBlocks = blocks sud
 
+prop_candidates :: Sudoku -> Pos -> Bool
+prop_candidates _ pos | not (inSudoku pos) = True
+prop_candidates sud _ | not (isOkay sud && isSudoku sud) = True
+prop_candidates sud pos = and(map checkCandidate (candidates sud pos))
+    where checkCandidate c = isOkay (sud' c) && isSudoku (sud' c)
+          sud' c = update sud pos (Just c)
+
 -- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
