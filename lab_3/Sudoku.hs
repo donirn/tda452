@@ -33,7 +33,7 @@ isSudokuElement (Just e) = e `elem` [1..9]
 
 -- Function isSolved: Checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved sud = and ( map (\r -> and (map (\e -> not (isNothing e)) r )) (rows sud))
+isSolved sud = and ( map (\r -> and (map isJust r )) (rows sud))
 
 -------------------------------------------------------------------------
 -- Assignment B
