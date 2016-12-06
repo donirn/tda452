@@ -7,6 +7,7 @@ import           Data.Maybe
 import           System.Random
 import           Test.QuickCheck
 import           Test.QuickCheck.Gen
+import           Test.QuickCheck.Property
 
 -------------------------------------------------------------------------
 -- Assignment A
@@ -33,7 +34,7 @@ isSudokuElement (Just e) = e `elem` [1..9]
 
 -- Function isSolved: Checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved sud = and ( map (\r -> and (map (\e -> not (isNothing e)) r )) (rows sud))
+isSolved sud = and ( map (\r -> and (map isJust r )) (rows sud))
 
 -------------------------------------------------------------------------
 -- Assignment B
@@ -134,8 +135,7 @@ blanks sud =  concat (zipWith (\r c -> [(r, k) |k <- c])
 
 -- Checks that that all cells in the blanks list are actually blank.
 prop_allCellsAreBlank :: Sudoku -> Bool
-prop_allCellsAreBlank sud =
-                            and (map (\(x,y) ->
+prop_allCellsAreBlank sud = and (map (\(x,y) ->
                               (rows sud)!!x!!y == Nothing) (blanks sud))
 
 -- Function (!!=) : Given a list, and a tuple containing an index in the list
@@ -144,13 +144,12 @@ prop_allCellsAreBlank sud =
 (!!=) :: [a] -> (Int,a) -> [a]
 (x:xs) !!= (i,v) | i == 0     = v:xs
                  | otherwise  = x:(xs !!= (i-1,v))
-[] !!= (i,v)     | i == 0     = [v]
-                 | otherwise  =
-                            error "Wrong index when inserting on empty list"
 
-prop_update :: (Eq a) => [a] -> (Int,a) -> Bool
-prop_update l (i,v)   | (0 <= i && i <= length(l)) = (l !!= (i,v))!!i == v
-                      | otherwise = True
+-- Function prop_replace : Checks if the element is actually updated
+prop_replace :: (Eq a) => [a] -> (Int,a) -> Bool
+prop_replace [] (_,_) = True
+prop_replace l (i,v) | (0 <= i && i < length(l)) = (l !!= (i,v))!!i == v
+                     | otherwise                  = True
 
 
 -- Function update: Given a Sudoku, a position, and a new cell value, updates
@@ -160,6 +159,16 @@ update sud (rowInd,colInd) newVal =
   Sudoku { rows = ((rows sud) !!= (rowInd, newRow)) }
     where newRow = ((rows sud)!!rowInd) !!= (colInd, newVal)
 
+-- Function prop_update : checks that the updated position really has gotten 
+-- the new value.
+prop_update :: Sudoku -> Pos -> Maybe Int -> Bool
+prop_update _ pos _ | not (inSudoku pos) = True
+prop_update sud (row,col) val = (rows (update sud (row,col) val))!!row!!col == val
+
+inSudoku :: Pos -> Bool
+inSudoku (row, col) | row < 0  || col < 0  = False
+                    | row >= 9 || col >= 9 = False
+                    | otherwise            = True
 
 -- Function candidates : Given a Sudoku, and a blank position, determines
 -- which numbers could be legally written into that position.
@@ -170,6 +179,18 @@ candidates sud (rowInd, colInd) = [1..9] \\ catMaybes relatedBlocks
                                         (colInd `div` 3))
         allBlocks = blocks sud
 
+-- Function prop_candidates : Check that updating with given candidates are
+-- actually okay based on the check on isSudoku and isOkay
+prop_candidates :: Sudoku -> Pos -> Bool
+prop_candidates _ pos | not (inSudoku pos) = True
+prop_candidates sud _ | not (isOkay sud && isSudoku sud) = True
+prop_candidates sud pos = and(map checkCandidate (candidates sud pos))
+    where checkCandidate c = isOkay (sud' c) && isSudoku (sud' c)
+          sud' c = update sud pos (Just c)
+
+-------------------------------------------------------------------------
+-- Assignment F
+
 -- Function solve: Solves a Sudoku. Return Nothing if the Sudoku does not
 -- have a solution.
 solve :: Sudoku -> Maybe Sudoku
@@ -179,13 +200,13 @@ solve sud | not( isSudoku sud && isOkay sud)  = Nothing
 
 -- Function solve: Solves a Sudoku.
 solve' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
-solve' sud pos [] = Nothing
+solve' _ _ [] = Nothing
 solve' sud pos (x:xs)
-                | isSolved sud' = Just sud'
-                | otherwise     = solve' sud' pos' (candidates sud' pos')
-                                    `orElse` solve' sud pos xs
-                  where sud' = update sud pos (Just x)
-                        pos' = head (blanks sud')
+    | isSolved sud' = Just sud'
+    | otherwise     = solve' sud' pos' (candidates sud' pos')
+                      `orElse` solve' sud pos xs
+    where sud' = update sud pos (Just x)
+          pos' = head (blanks sud')
 
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse (Just x) _ = Just x
@@ -198,7 +219,7 @@ readAndSolve filePath = do sud <- readSudoku filePath
                            let solution = solve sud
                            if isJust solution then
                              printSudoku (fromJust solution)
-                             else putStrLn "(no solution)"
+                           else putStrLn "(no solution)"
 
 
 -- Function isSolutionOf: Checks, given two Sudokus, whether the first one is
@@ -207,15 +228,19 @@ readAndSolve filePath = do sud <- readSudoku filePath
 -- the second sudoku are maintained in the first one).
 isSolutionOf :: Sudoku -> Sudoku -> Bool
 isSolutionOf first second = isSolved first && isOkay first && checkSol
-  where checkSol = and (zipWith (\fr sr ->
-                    and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
+    where checkSol = and (zipWith (\fr sr ->
+                        and (zipWith (\p q -> (p == q) || (q == Nothing)) fr sr))
                         (rows first)
                         (rows second))
 
 -- prop_SolveSound: Tests that every supposed solution produced by solve
 -- actually is a valid solution of the original problem.
-prop_SolveSound :: Sudoku -> Bool
-prop_SolveSound sud = fromJust (solve sud) `isSolutionOf` sud
+prop_SolveSound :: Sudoku -> Property
+prop_SolveSound sud | not (isOkay sud && isSudoku sud) = property True
+prop_SolveSound sud | isNothing solvedSud = property True
+                    | otherwise = property (fromJust solvedSud `isSolutionOf` sud)
+                    where solvedSud = solve sud
 
--- TODO
--- DONI  -> E3, E4
+-- use fewer tests when using quickCheck
+fewerChecks :: Testable prop => prop -> IO ()
+fewerChecks prop = quickCheckWith stdArgs{ maxSuccess = 30 } prop
