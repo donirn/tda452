@@ -1,3 +1,6 @@
+module Expr where
+import Data.Char(isDigit)
+import Parsing hiding (chain,digit)
 
 data Expr = Num Double
           | Var
@@ -8,7 +11,6 @@ data Expr = Num Double
 
 instance Show Expr where
   show = showExpr
-
 -- 2*sin x + 0.5*cos(10*x)
 ex1 = Add (Mul (Num 2) (Sin Var)) (Mul (Num 0.5) (Cos (Mul (Num 10) Var)))
 
@@ -43,3 +45,22 @@ eval (Sin a) x   = sin (eval a x)
 ---------------------------------------------------------------------------
 -- Given a string, tries to interpret the string as an expression, and returns Just of that expression if it succeeds. Otherwise, Nothing will be returned.
 --readExpr :: String -> Maybe Expr
+
+-- | Parse a digit (also available in the Parsing module)
+digit :: Parser Char
+digit = sat isDigit
+
+-- | Parse a number
+number :: Parser Double
+number = do --s <- oneOrMore digit
+            --char '.'
+            --t <- zeroOrMore digit
+            return (read s)
+
+--expr, term, factor :: Parser Expr
+--
+--expr = leftAssoc Add term (char '+')
+--
+--term = leftAssoc Mul factor (char '*')
+--
+--factor = (Num <$> number) <|> (char '(' *> expr <* char ')')
