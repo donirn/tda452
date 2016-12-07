@@ -1,3 +1,6 @@
+module Expr where
+import Data.Char(isDigit)
+import Parsing hiding (chain,digit)
 
 module Expr where
 import Parsing
@@ -12,7 +15,6 @@ data Expr = Num Double
 
 instance Show Expr where
   show = showExpr
-
 -- 2*sin x + 0.5*cos(10*x)
 ex1 = Add (Mul (Num 2) (Sin Var)) (Mul (Num 0.5) (Cos (Mul (Num 10) Var)))
 ex1' = "2.0*sin x +0.5*cos (10.0*x)"
