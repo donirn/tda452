@@ -1,8 +1,4 @@
 module Expr where
-import Data.Char(isDigit)
-import Parsing hiding (chain,digit)
-
-module Expr where
 import Parsing
 import Data.Char
 
@@ -49,8 +45,12 @@ eval (Cos a) x   = cos (eval a x)
 eval (Sin a) x   = sin (eval a x)
 ---------------------------------------------------------------------------
 -- Given a string, tries to interpret the string as an expression, and returns Just of that expression if it succeeds. Otherwise, Nothing will be returned.
---readExpr :: String -> Maybe Expr
+readExpr :: String -> Maybe Expr
+readExpr s = case parse expr s of
+  Just (e,_) -> Just e
+  _ -> Nothing
 
+-- TODO parser for sin cos and variable
 expr, term, factor :: Parser Expr
 
 expr = leftAssoc Add term (char '+')
