@@ -1,4 +1,8 @@
 
+module Expr where
+import Parsing
+import Data.Char
+
 data Expr = Num Double
           | Var
           | Add Expr Expr
@@ -11,6 +15,7 @@ instance Show Expr where
 
 -- 2*sin x + 0.5*cos(10*x)
 ex1 = Add (Mul (Num 2) (Sin Var)) (Mul (Num 0.5) (Cos (Mul (Num 10) Var)))
+ex1' = "2.0*sin x +0.5*cos (10.0*x)"
 
 ---------------------------------------------------------------------------
 
@@ -43,3 +48,23 @@ eval (Sin a) x   = sin (eval a x)
 ---------------------------------------------------------------------------
 -- Given a string, tries to interpret the string as an expression, and returns Just of that expression if it succeeds. Otherwise, Nothing will be returned.
 --readExpr :: String -> Maybe Expr
+
+expr, term, factor :: Parser Expr
+
+expr = leftAssoc Add term (char '+')
+
+term = leftAssoc Mul factor (char '*')
+
+factor = (Num <$> number) <|> (char '(' *> expr <* char ')')
+
+-- | Parse a list of items with separators
+-- (also available in the Parsing module)
+leftAssoc :: (t->t->t) -> Parser t -> Parser sep -> Parser t
+leftAssoc op item sep = do i:is <- chain item sep
+                           return (foldl op i is)
+
+-- | Parse a number
+number :: Parser Double
+number = do s <- oneOrMore (sat (\c -> isDigit c || c == '.'))
+            return (read s)
+
