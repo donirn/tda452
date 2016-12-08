@@ -57,7 +57,7 @@ expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (Num <$> number) <|> (char '(' *> expr <* char ')')
+factor = (var) <|> (Num <$> number) <|> (char '(' *> expr <* char ')')
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -70,3 +70,6 @@ number :: Parser Double
 number = do s <- oneOrMore (sat (\c -> isDigit c || c == '.'))
             return (read s)
 
+var :: Parser Expr
+var = do c <- sat ('x' ==)
+         return Var
