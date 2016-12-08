@@ -142,15 +142,21 @@ prop_allCellsAreBlank sud = and (map (\(x,y) ->
 -- and a new value, updates the given list with the new value at the given
 -- index.
 (!!=) :: [a] -> (Int,a) -> [a]
-(x:xs) !!= (i,v) | i == 0     = v:xs
-                 | otherwise  = x:(xs !!= (i-1,v))
+xs !!= (i,v) = case (splitAt i xs) of
+  (l1,y:ys) -> l1 ++ (v:xs)
 
+-- TODO: fix the prop_replace check length and the rest of element
 -- Function prop_replace : Checks if the element is actually updated
 prop_replace :: (Eq a) => [a] -> (Int,a) -> Bool
 prop_replace [] (_,_) = True
-prop_replace l (i,v) | (0 <= i && i < length(l)) = (l !!= (i,v))!!i == v
+prop_replace l (i,v) | (0 <= i && i < length(l)) = updatedList!!i == v
+                                                   && length(updatedList) == length(l)
+                                                   && h1 == h2
+                                                   && t1 == t2
                      | otherwise                  = True
-
+                      where updatedList = (l !!= (i,v))
+                            (h1,_:t1) = splitAt i l
+                            (h2,_:t2) = splitAt i updatedList
 
 -- Function update: Given a Sudoku, a position, and a new cell value, updates
 -- the given Sudoku at the given position with the new value.
