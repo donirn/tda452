@@ -38,6 +38,8 @@ showFactor e         = showExpr e
 showFactor' :: Expr -> String
 showFactor' (Num n) = showExpr (Num n)
 showFactor' Var     = showExpr Var
+showFactor' (Sin a) = showExpr (Sin a)
+showFactor' (Cos a) = showExpr (Cos a)
 showFactor' e       = "(" ++ showExpr e ++ ")"
 ---------------------------------------------------------------------------
 -- given an expression, and the value for the variable x
@@ -60,15 +62,13 @@ stripWhitespace :: String -> String
 stripWhitespace = filter (' ' /=)
 
 -- TODO parser for sin and cos
-expr, term, factor, factor' :: Parser Expr
+expr, term, factor :: Parser Expr
 
 expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = sinP <|> cosP <|> factor'
-
-factor' = var <|> double <|> parentheses
+factor = sinP <|> cosP <|> var <|> double <|> parentheses
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -87,7 +87,7 @@ parentheses = char '(' *> expr <* char ')'
 
 -- Parse an expression that has prefix, e.g. sin, cos
 prefixParser :: (Expr -> Expr) -> String -> Parser Expr
-prefixParser f (x:xs) = foldl (\b a -> b *> char a) (char x) xs *> (f <$> factor')
+prefixParser f (x:xs) = foldl (\b a -> b *> char a) (char x) xs *> (f <$> factor)
 
 sinP :: Parser Expr
 sinP = prefixParser Sin "sin"
