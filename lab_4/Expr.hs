@@ -46,9 +46,14 @@ eval (Sin a) x   = sin (eval a x)
 ---------------------------------------------------------------------------
 -- Given a string, tries to interpret the string as an expression, and returns Just of that expression if it succeeds. Otherwise, Nothing will be returned.
 readExpr :: String -> Maybe Expr
-readExpr s = case parse expr s of
+readExpr s = case parse expr (stripWhitespace s) of
   Just (e,_) -> Just e
   _ -> Nothing
+
+stripWhitespace :: String -> String
+stripWhitespace [] = []
+stripWhitespace (' ':xs) = xs
+stripWhitespace (x:xs)   = x : stripWhitespace xs
 
 -- TODO parser for sin and cos
 expr, term, factor :: Parser Expr
@@ -57,7 +62,7 @@ expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (var) <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
+factor = (Sin <$> sinP) <|> var <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -66,5 +71,12 @@ leftAssoc op item sep = do i:is <- chain item sep
                            return (foldl op i is)
 
 var :: Parser Expr
-var = do c <- sat ('x' ==)
+var = do c <- char 'x'
          return Var
+
+sinP :: Parser Expr
+sinP = do s <- char 's'
+          i <- char 'i'
+          n <- char 'n'
+          e <- expr
+          return (Sin e) 
