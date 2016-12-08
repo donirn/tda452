@@ -62,7 +62,7 @@ expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (sinP *> (Sin <$> (var <|> (Num <$> readsP) ))) <|> var <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
+factor = (sinP *> (Sin <$> (varOrDouble <|> parentheses))) <|> varOrDouble <|> parentheses
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -70,9 +70,18 @@ leftAssoc :: (t->t->t) -> Parser t -> Parser sep -> Parser t
 leftAssoc op item sep = do i:is <- chain item sep
                            return (foldl op i is)
 
+double :: Parser Expr
+double = Num <$> readsP
+
 var :: Parser Expr
 var = do c <- char 'x'
          return Var
+
+varOrDouble :: Parser Expr
+varOrDouble = var <|> double
+
+parentheses :: Parser Expr
+parentheses = char '(' *> expr <* char ')'
 
 sinP :: Parser String
 sinP = do s <- char 's'
