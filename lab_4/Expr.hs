@@ -50,25 +50,20 @@ readExpr s = case parse expr s of
   Just (e,_) -> Just e
   _ -> Nothing
 
--- TODO parser for sin cos and variable
+-- TODO parser for sin and cos
 expr, term, factor :: Parser Expr
 
 expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (var) <|> (Num <$> number) <|> (char '(' *> expr <* char ')')
+factor = (var) <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
 leftAssoc :: (t->t->t) -> Parser t -> Parser sep -> Parser t
 leftAssoc op item sep = do i:is <- chain item sep
                            return (foldl op i is)
-
--- | Parse a number
-number :: Parser Double
-number = do s <- oneOrMore (sat (\c -> isDigit c || c == '.'))
-            return (read s)
 
 var :: Parser Expr
 var = do c <- sat ('x' ==)
