@@ -15,6 +15,11 @@ instance Show Expr where
 -- 2*sin x + 0.5*cos(10*x)
 ex1 = Add (Mul (Num 2) (Sin Var)) (Mul (Num 0.5) (Cos (Mul (Num 10) Var)))
 ex1' = "2.0*sin x +0.5*cos (10.0*x)"
+ex2' = "2*3+(4*5)"
+ex3' = "sin(x)"
+ex4' = "sin (cos x)"
+ex5' = "(sin x) + (cos x)"
+ex6' = "sin cos x"
 
 ---------------------------------------------------------------------------
 
