@@ -62,7 +62,7 @@ expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (Sin <$> sinP) <|> var <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
+factor = (sinP *> (Sin <$> (var <|> (Num <$> readsP) ))) <|> var <|> (Num <$> readsP) <|> (char '(' *> expr <* char ')')
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -74,9 +74,8 @@ var :: Parser Expr
 var = do c <- char 'x'
          return Var
 
-sinP :: Parser Expr
+sinP :: Parser String
 sinP = do s <- char 's'
           i <- char 'i'
           n <- char 'n'
-          e <- expr
-          return (Sin e) 
+          return ""
