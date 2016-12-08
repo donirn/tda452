@@ -1,6 +1,7 @@
 module Expr where
 import Parsing
 import Data.Char
+import Data.List
 
 data Expr = Num Double
           | Var
@@ -51,18 +52,18 @@ readExpr s = case parse expr (stripWhitespace s) of
   _ -> Nothing
 
 stripWhitespace :: String -> String
-stripWhitespace [] = []
-stripWhitespace (' ':xs) = xs
-stripWhitespace (x:xs)   = x : stripWhitespace xs
+stripWhitespace = filter (' ' /=)
 
 -- TODO parser for sin and cos
-expr, term, factor :: Parser Expr
+expr, term, factor, factor' :: Parser Expr
 
 expr = leftAssoc Add term (char '+')
 
 term = leftAssoc Mul factor (char '*')
 
-factor = (sinP *> (Sin <$> (varOrDouble <|> parentheses))) <|> varOrDouble <|> parentheses
+factor = sinP <|> cosP <|> factor'
+
+factor' = var <|> double <|> parentheses
 
 -- | Parse a list of items with separators
 -- (also available in the Parsing module)
@@ -74,17 +75,17 @@ double :: Parser Expr
 double = Num <$> readsP
 
 var :: Parser Expr
-var = do c <- char 'x'
-         return Var
-
-varOrDouble :: Parser Expr
-varOrDouble = var <|> double
+var = char 'x' *> return Var
 
 parentheses :: Parser Expr
 parentheses = char '(' *> expr <* char ')'
 
-sinP :: Parser String
-sinP = do s <- char 's'
-          i <- char 'i'
-          n <- char 'n'
-          return ""
+-- Parse an expression that has prefix, e.g. sin, cos
+prefixParser :: (Expr -> Expr) -> String -> Parser Expr
+prefixParser f (x:xs) = foldl (\b a -> b *> char a) (char x) xs *> (f <$> factor')
+
+sinP :: Parser Expr
+sinP = prefixParser Sin "sin"
+
+cosP :: Parser Expr
+cosP = prefixParser Cos "cos"
