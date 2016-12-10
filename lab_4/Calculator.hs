@@ -44,5 +44,6 @@ main = do
     onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input can
       -- "Enter" key has code 13
 points :: Expr -> Double -> (Int,Int) -> [Point]
-points e 1 (300,300) = [(x, eval e x) | x <- xs] where
-  xs = [-300..300]
+points e 1 (w,h) = filter (\(_,y) -> fromIntegral h >= abs y) [(x,f x) | x<-xs] where
+  xs = [-fromIntegral w..fromIntegral w]
+  f = eval e
