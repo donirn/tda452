@@ -1,3 +1,9 @@
+-- TODO
+-- DONI: H, I, J
+-- JP:  E, F, G
+-- TBD: K
+
+
 module Expr where
 import Parsing
 import Data.Char
