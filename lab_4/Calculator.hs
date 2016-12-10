@@ -44,6 +44,16 @@ main = do
     onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input can
       -- "Enter" key has code 13
 points :: Expr -> Double -> (Int,Int) -> [Point]
-points e 1 (w,h) = filter (\(_,y) -> fromIntegral h >= abs y) [(x,f x) | x<-xs] where
-  xs = [-fromIntegral w..fromIntegral w]
+points e s (w,h) = map (\(x,y) -> (realToPix x, realToPix y)) (filter (\(_,y) -> realH >= abs y) [(x,f x) | x<-xs]) where
+  xs = [-realW..realW]
   f = eval e
+  realW = pixToReal (fromIntegral w)
+  realH = pixToReal (fromIntegral h)
+
+  -- converts a pixel x-coordinate to a real x-coordinate
+  pixToReal :: Double -> Double
+  pixToReal x = x*s
+
+  -- converts a real y-coordinate to a pixel y-coordinate
+  realToPix :: Double -> Double
+  realToPix y = y/s
