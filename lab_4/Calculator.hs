@@ -43,3 +43,6 @@ main = do
     onEvent draw  Click $ \_    -> readAndDraw input can
     onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input can
       -- "Enter" key has code 13
+points :: Expr -> Double -> (Int,Int) -> [Point]
+points e 1 (300,300) = [(x, eval e x) | x <- xs] where
+  xs = [-300..300]
