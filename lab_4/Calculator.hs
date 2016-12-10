@@ -5,6 +5,8 @@ import Haste.DOM
 import Haste.Events
 import Haste.Graphics.Canvas
 
+import Data.Maybe
+
 import Pages
 
 import Expr
@@ -15,7 +17,10 @@ canWidth  = 300
 canHeight = 300
 
 readAndDraw :: Elem -> Canvas -> IO ()
-readAndDraw = undefined
+readAndDraw t c = do s <- getProp t "value"
+                     let e = readExpr s
+                     let p = points (fromJust e) 1 (300,300)
+                     render c (stroke (path p))
 
 main = do
     -- Elements
@@ -43,6 +48,7 @@ main = do
     onEvent draw  Click $ \_    -> readAndDraw input can
     onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input can
       -- "Enter" key has code 13
+
 points :: Expr -> Double -> (Int,Int) -> [Point]
 points e s (w,h) = map (\(x,y) -> (realToPix x, realToPix y)) (filter (\(_,y) -> realH >= abs y) [(x,f x) | x<-xs]) where
   xs = [-realW..realW]
