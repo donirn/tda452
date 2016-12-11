@@ -18,9 +18,11 @@ canHeight = 300
 
 readAndDraw :: Elem -> Canvas -> IO ()
 readAndDraw t c = do s <- getProp t "value"
-                     let e = readExpr s
-                     let p = points (fromJust e) 1 (300,300)
-                     render c (stroke (path p))
+                     case readExpr s of 
+                      Just e -> do let p = points e 1 (300,300)
+                                   render c (stroke (path p))
+                      otherwise -> alert "f(x) is wrong"
+                     
 
 main = do
     -- Elements
