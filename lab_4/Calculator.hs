@@ -50,16 +50,14 @@ main = do
       -- "Enter" key has code 13
 
 points :: Expr -> Double -> (Int,Int) -> [Point]
-points e s (w,h) = map (\(x,y) -> (realToPix x, realToPix y)) (filter (\(_,y) -> realH >= abs y) [(x,f x) | x<-xs]) where
-  xs = [-realW..realW]
-  f = eval e
-  realW = pixToReal (fromIntegral w)
-  realH = pixToReal (fromIntegral h)
+points e s (w,h) = zip xs ys where
+  xs = [0..fromIntegral w]
+  ys = map (realToPix . eval e . pixToReal) xs
 
   -- converts a pixel x-coordinate to a real x-coordinate
   pixToReal :: Double -> Double
-  pixToReal x = x*s
+  pixToReal x = (x - (fromIntegral w)/2) * s
 
   -- converts a real y-coordinate to a pixel y-coordinate
   realToPix :: Double -> Double
-  realToPix y = y/s
+  realToPix y = -y/s + (fromIntegral h)/2
