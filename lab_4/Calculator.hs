@@ -10,18 +10,25 @@ import Data.Maybe
 import Pages
 
 import Expr
+import Parsing
 
 
 
 canWidth  = 300
 canHeight = 300
 
-readAndDraw :: Elem -> Canvas -> IO ()
-readAndDraw t c = do s <- getProp t "value"
-                     case readExpr s of 
-                      Just e -> do let p = points e 1 (300,300)
-                                   render c (stroke (path p))
-                      otherwise -> alert "f(x) is wrong"
+readAndDraw :: Elem -> Elem -> Canvas -> IO ()
+readAndDraw fI sI c = do fV <- getProp fI "value"
+                         case readExpr fV of 
+                           Just e    -> do sV <- getProp sI "value"
+                                           case parse readsP sV of
+                                             Just (s,_) -> readAndDraw' e s c
+                                             otherwise -> alert "scale is wrong"
+                           otherwise -> alert "f(x) is wrong"
+
+readAndDraw' :: Expr -> Double -> Canvas -> IO ()
+readAndDraw' e s c = do let p = points e s (300,300)
+                        render c (stroke (path p))
                      
 
 main = do
@@ -29,6 +36,8 @@ main = do
     canvas  <- mkCanvas canWidth canHeight   -- The drawing area
     fx      <- mkHTML "<i>f</i>(<i>x</i>)="  -- The text "f(x)="
     input   <- mkInput 20 "x"                -- The formula input
+    scale   <- mkHTML "scale="                -- The text "scale"
+    scaleI  <- mkInput 4 "1"                 -- The scale input
     draw    <- mkButton "Draw graph"         -- The draw button
       -- The markup "<i>...</i>" means that the text inside should be rendered
       -- in italics.
@@ -36,7 +45,9 @@ main = do
     -- Layout
     formula <- mkDiv
     row formula [fx,input]
-    column documentBody [canvas,formula,draw]
+    scaleR <- mkDiv
+    row scaleR [scale,scaleI]
+    column documentBody [canvas,formula,scaleR,draw]
 
     -- Styling
     setStyle documentBody "backgroundColor" "lightblue"
@@ -47,8 +58,8 @@ main = do
 
     -- Interaction
     Just can <- getCanvas canvas
-    onEvent draw  Click $ \_    -> readAndDraw input can
-    onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input can
+    onEvent draw  Click $ \_    -> readAndDraw input scaleI can
+    onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input scaleI can
       -- "Enter" key has code 13
 
 points :: Expr -> Double -> (Int,Int) -> [Point]
