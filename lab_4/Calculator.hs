@@ -27,7 +27,7 @@ readAndDraw fI sI c = do fV <- getProp fI "value"
                            otherwise -> alert "f(x) is wrong"
 
 readAndDraw' :: Expr -> Double -> Canvas -> IO ()
-readAndDraw' e s c = do let p = points e s (300,300)
+readAndDraw' e s c = do let p = points e s (canWidth,canHeight)
                         render c (stroke (path p))
                      
 
