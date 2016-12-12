@@ -116,21 +116,24 @@ instance Arbitrary Expr where
   arbitrary = sized arbExpr
 arbExpr :: Int -> Gen Expr
 arbExpr s =
-  frequency [ (1, do  n <- arbitrary
-                      return (Num n))
-            , (s, do  a <- arbExpr s'
-                      b <- arbExpr s'
-                      return (Add a b))
-            , (s, do  a <- arbExpr s'
-                      b <- arbExpr s'
-                      return (Mul a b))
-            , (s, do  a <- arbExpr s'
-                      return (Cos a))
-            , (s, do  a <- arbExpr s'
-                      return (Sin a))
+  frequency [ (1, do n <- arbitrary
+                     return (Num n))
+            , (s, do a <- arbExpr s'
+                     b <- arbExpr s'
+                     return (Add a b))
+            , (s, do a <- arbExpr s'
+                     b <- arbExpr s'
+                     return (Mul a b))
+            , (s, do a <- arbExpr s'
+                     return (Cos a))
+            , (s, do a <- arbExpr s'
+                     return (Sin a))
+            , (s, do return Var)
             ]
   where s' = s `div` 2
 -----------------------------------------------------------------------------
 -- Function simplify
 --simplify :: Expr -> Expr
+--simplify e | null (vars e) =
+
 --prop_SimplifyCorrect e (Env env) = eval env e == eval env (simplify e)
