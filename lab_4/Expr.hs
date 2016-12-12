@@ -19,6 +19,8 @@ data Expr = Num Double
           | Mul Expr Expr
           | Cos Expr
           | Sin Expr
+          deriving (Eq{-,Show-})
+
 
 instance Show Expr where
   show = showExpr
@@ -111,7 +113,8 @@ cosP = prefixParser Cos "cos"
 -- Property prop_ShowReadExpr: Shows that first showing and then reading an
 -- expression (using your functions showExpr and readExpr) should produce
 -- "the same" result as the expression you started with.
---prop_ShowReadExpr :: Expr -> Bool
+prop_ShowReadExpr :: Expr -> Bool
+prop_ShowReadExpr e = readExpr(showExpr e) == Just e
 
 instance Arbitrary Expr where
   arbitrary = sized arbExpr
