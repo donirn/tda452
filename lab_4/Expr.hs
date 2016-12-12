@@ -12,6 +12,7 @@ import System.Random
 import Test.QuickCheck
 import Test.QuickCheck.Gen
 import Test.QuickCheck.Random
+import Data.Maybe
 
 data Expr = Num Double
           | Var
@@ -158,6 +159,11 @@ mul a       (Num 1)   = a
 mul (Num x) (Num y)   = Num (x*y)
 mul a       b         = Mul a b
 
+-- TODO: should take account for Var
+-- e.g. "x+x" should return "2*x"
+-- maybe also "4*x+2*x" should return "6*x"
+-- but this is optional
+
 add :: Expr -> Expr -> Expr
 add (Num 0) a         = a
 add a       (Num 0)   = a
@@ -167,6 +173,8 @@ add a       b         = Add a b
 -----------------------------------------------------------------------------
 -- G.
 -- Function differentiate
+
+-- FIXME: use "simplify" function instead of "add" and "mul"
 differentiate :: Expr -> Expr
 differentiate (Num n)   = Num 0
 differentiate Var       = Num 1
@@ -175,3 +183,6 @@ differentiate (Mul a b) = add (mul a (differentiate b))
                                 (mul b (differentiate a))
 differentiate (Sin e)     = mul (differentiate e) (Cos e)
 differentiate (Cos e)     = mul (Num (-1)) (mul (differentiate e) (Sin e))
+
+-- FIXME: failed, the result should be "(-1) 12*x*x*x*sin (3*x*x*x*x)"
+exG1 = fromJust (readExpr "cos(3*x*x*x*x)")
