@@ -5,9 +5,13 @@
 
 
 module Expr where
-import Parsing
 import Data.Char
 import Data.List
+import Parsing
+import System.Random
+import Test.QuickCheck
+import Test.QuickCheck.Gen
+import Test.QuickCheck.Random
 
 data Expr = Num Double
           | Var
@@ -58,7 +62,9 @@ eval (Mul a b) x = (eval a x) * (eval b x)
 eval (Cos a) x   = cos (eval a x)
 eval (Sin a) x   = sin (eval a x)
 ---------------------------------------------------------------------------
--- Given a string, tries to interpret the string as an expression, and returns Just of that expression if it succeeds. Otherwise, Nothing will be returned.
+-- Function readExpr: Given a string, tries to interpret the string as an
+-- expression, and returns Just of that expression if it succeeds. Otherwise,
+-- Nothing will be returned.
 readExpr :: String -> Maybe Expr
 readExpr s = case parse expr (stripWhitespace s) of
   Just (e,_) -> Just e
@@ -67,7 +73,6 @@ readExpr s = case parse expr (stripWhitespace s) of
 stripWhitespace :: String -> String
 stripWhitespace = filter (' ' /=)
 
--- TODO parser for sin and cos
 expr, term, factor :: Parser Expr
 
 expr = leftAssoc Add term (char '+')
@@ -100,3 +105,32 @@ sinP = prefixParser Sin "sin"
 
 cosP :: Parser Expr
 cosP = prefixParser Cos "cos"
+
+-----------------------------------------------------------------------------
+-- E.   says that first showing and then reading an expression (using your
+-- functions showExpr and readExpr) should produce "the same" result as the
+-- expression you started with.
+--prop_ShowReadExpr :: Expr -> Bool
+
+instance Arbitrary Expr where
+  arbitrary = sized arbExpr
+arbExpr :: Int -> Gen Expr
+arbExpr s =
+  frequency [ (1, do  n <- arbitrary
+                      return (Num n))
+            , (s, do  a <- arbExpr s'
+                      b <- arbExpr s'
+                      return (Add a b))
+            , (s, do  a <- arbExpr s'
+                      b <- arbExpr s'
+                      return (Mul a b))
+            , (s, do  a <- arbExpr s'
+                      return (Cos a))
+            , (s, do  a <- arbExpr s'
+                      return (Sin a))
+            ]
+  where s' = s `div` 2
+-----------------------------------------------------------------------------
+-- Function simplify
+--simplify :: Expr -> Expr
+--prop_SimplifyCorrect e (Env env) = eval env e == eval env (simplify e)
