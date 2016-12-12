@@ -168,3 +168,5 @@ differentiate Var       = Num 1
 differentiate (Add a b) = add (differentiate a) (differentiate b)
 differentiate (Mul a b) = add (mul a (differentiate b))
                                 (mul b (differentiate a))
+differentiate (Sin e)     = mul (differentiate e) (Cos e)
+differentiate (Cos e)     = mul (differentiate e) (Sin e)
