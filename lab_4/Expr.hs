@@ -107,9 +107,10 @@ cosP :: Parser Expr
 cosP = prefixParser Cos "cos"
 
 -----------------------------------------------------------------------------
--- E.   says that first showing and then reading an expression (using your
--- functions showExpr and readExpr) should produce "the same" result as the
--- expression you started with.
+-- E.
+-- Property prop_ShowReadExpr: Shows that first showing and then reading an
+-- expression (using your functions showExpr and readExpr) should produce
+-- "the same" result as the expression you started with.
 --prop_ShowReadExpr :: Expr -> Bool
 
 instance Arbitrary Expr where
@@ -132,8 +133,35 @@ arbExpr s =
             ]
   where s' = s `div` 2
 -----------------------------------------------------------------------------
--- Function simplify
+-- F.
+-- Function simplify: simplifies expressions so that subexpressions not
+-- involving variables are always simplified to their smallest
+-- representation.
 --simplify :: Expr -> Expr
 --simplify e | null (vars e) =
 
 --prop_SimplifyCorrect e (Env env) = eval env e == eval env (simplify e)
+
+mul :: Expr -> Expr -> Expr
+mul (Num 0) b         = Num 0
+mul a       (Num 0)   = Num 0
+mul (Num 1) b         = b
+mul a       (Num 1)   = a
+mul (Num x) (Num y)   = Num (x*y)
+mul a       b         = Mul a b
+
+add :: Expr -> Expr -> Expr
+add (Num 0) a         = a
+add a       (Num 0)   = a
+add (Num x) (Num y)   = Num (x+y)
+add a       b         = Add a b
+
+-----------------------------------------------------------------------------
+-- G.
+-- Function differentiate
+differentiate :: Expr -> Expr
+differentiate (Num n)   = Num 0
+differentiate Var       = Num 1
+differentiate (Add a b) = add (differentiate a) (differentiate b)
+differentiate (Mul a b) = add (mul a (differentiate b))
+                                (mul b (differentiate a))
