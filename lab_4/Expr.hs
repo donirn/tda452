@@ -32,6 +32,7 @@ ex3' = "sin(x)"
 ex4' = "sin (cos x)"
 ex5' = "(sin x) + (cos x)"
 ex6' = "sin cos x"
+ex7' = "sin (-7.321271617241244+sin 1.3841251597435147 +cos 21.38739735015702)"
 
 ---------------------------------------------------------------------------
 
@@ -140,8 +141,12 @@ arbExpr s =
 -- Function simplify: simplifies expressions so that subexpressions not
 -- involving variables are always simplified to their smallest
 -- representation.
---simplify :: Expr -> Expr
---simplify e | null (vars e) =
+simplify :: Expr -> Expr
+simplify (Add a b)  =   add (simplify a) (simplify b)
+simplify (Mul a b)  =   mul (simplify a) (simplify b)
+simplify (Sin e)    =   Sin (simplify e)
+simplify (Cos e)    =   Cos (simplify e)
+simplify e          =   e
 
 --prop_SimplifyCorrect e (Env env) = eval env e == eval env (simplify e)
 
@@ -169,4 +174,4 @@ differentiate (Add a b) = add (differentiate a) (differentiate b)
 differentiate (Mul a b) = add (mul a (differentiate b))
                                 (mul b (differentiate a))
 differentiate (Sin e)     = mul (differentiate e) (Cos e)
-differentiate (Cos e)     = mul (differentiate e) (Sin e)
+differentiate (Cos e)     = mul (Num (-1)) (mul (differentiate e) (Sin e))
