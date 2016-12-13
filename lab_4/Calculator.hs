@@ -33,6 +33,18 @@ readAndDraw'' :: Expr -> Double -> Canvas -> IO ()
 readAndDraw'' e s c = do let p = points e s (canWidth,canHeight)
                          render c (stroke (path p))
                      
+diffAndDraw :: Elem -> Elem -> Elem -> Canvas -> IO ()
+diffAndDraw fI dR sI c = do d <- diff fI
+                            set dR [ prop "innerHTML" =: d ]
+                            readAndDraw' (fromJust (readExpr d)) sI c
+
+-- read fI value and returns the differentiate of the value
+-- returns empty string if it is not possible
+diff :: Elem -> IO String
+diff fI = do fV <- getProp fI "value"
+             case readExpr fV of 
+              Just e    -> return (showExpr (differentiate e))
+              otherwise -> return ""
 
 main = do
     -- Elements
@@ -43,7 +55,7 @@ main = do
     scaleI  <- mkInput 4 "1"                 -- The scale input
     draw    <- mkButton "Draw graph"         -- The draw button
     diffB   <- mkButton "Diff & Draw"        -- The diff button
-    diffRes   <- mkHTML "asa"                     -- Result of differentiation
+    diffRes   <- mkHTML ""                     -- Result of differentiation
       -- The markup "<i>...</i>" means that the text inside should be rendered
       -- in italics.
 
@@ -52,9 +64,9 @@ main = do
     row formula [fx,input]
     scaleR <- mkDiv
     row scaleR [scale,scaleI]
-    diffR <- mkDiv
-    row diffR [diffB, diffRes]
-    column documentBody [canvas,formula,scaleR,draw, diffR]
+    diffRow <- mkDiv
+    row diffRow [diffB, diffRes]
+    column documentBody [canvas,formula,scaleR,draw, diffRow]
 
     -- Styling
     setStyle documentBody "backgroundColor" "lightblue"
@@ -68,15 +80,7 @@ main = do
     onEvent draw  Click $ \_    -> readAndDraw input scaleI can
     onEvent input KeyUp $ \code -> when (code==13) $ readAndDraw input scaleI can
       -- "Enter" key has code 13
-    onEvent diffB Click $ \_    -> do d <- diff input
-                                      set diffRes [ prop "innerHTML" =: d ]
-                                      readAndDraw' (fromJust (readExpr d)) scaleI can
-
-diff :: Elem -> IO String
-diff fI = do fV <- getProp fI "value"
-             case readExpr fV of 
-              Just e    -> return (showExpr (differentiate e))
-              otherwise -> return ""
+    onEvent diffB Click $ \_    -> diffAndDraw input diffRes scaleI can
 
 points :: Expr -> Double -> (Int,Int) -> [Point]
 points e s (w,h) = zip xs ys where
