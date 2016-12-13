@@ -152,7 +152,8 @@ simplify (Sin e)    =   Sin (simplify e)
 simplify (Cos e)    =   Cos (simplify e)
 simplify e          =   e
 
---prop_SimplifyCorrect e (Env env) = eval env e == eval env (simplify e)
+prop_SimplifyCorrect :: Expr -> Double-> Bool
+prop_SimplifyCorrect e n = eval e n  `almostEqual` eval (simplify e) n
 
 mul :: Expr -> Expr -> Expr
 mul (Num 0) b         = Num 0
