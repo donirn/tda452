@@ -139,7 +139,7 @@ arbExpr s =
                      return (Sin a))
             , (s, do return Var)
             ]
-  where s' = s `div` 2
+  where s' = s `div` 5
 -----------------------------------------------------------------------------
 -- F.
 -- Function simplify: simplifies expressions so that subexpressions not
