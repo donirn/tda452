@@ -10,14 +10,15 @@ import Data.List
 import Parsing
 import System.Random
 import Data.Maybe
+import Data.List
 
-data Expr = Num Double
-          | Var
-          | Add Expr Expr
+data Expr = Add Expr Expr
           | Mul Expr Expr
-          | Cos Expr
           | Sin Expr
-          deriving (Eq{-,Show-})
+          | Cos Expr
+          | Var
+          | Num Double
+          deriving (Eq,Ord)
 
 
 instance Show Expr where
@@ -137,6 +138,35 @@ add (Num 0) a         = a
 add a       (Num 0)   = a
 add (Num x) (Num y)   = Num (x+y)
 add a       b         = Add a b
+
+sortExpr :: Expr -> Expr
+sortExpr (Add a b) = sortAdd a b
+sortExpr (Mul a b) = sortMul a b
+sortExpr (Sin a)   = Sin (sortExpr a)
+sortExpr (Cos a)   = Cos (sortExpr a)
+sortExpr e         = e
+
+sortAdd :: Expr -> Expr -> Expr
+sortAdd a b = foldl Add x xs
+  where l = listAdd a b
+        (x:xs) = sort l
+
+listAdd :: Expr -> Expr -> [Expr]
+listAdd (Add a b) (Add c d) = listAdd (sortExpr a) (sortExpr b) ++ listAdd (sortExpr c) (sortExpr d)
+listAdd a         (Add b c) = (sortExpr a) : listAdd (sortExpr b) (sortExpr c)
+listAdd (Add a b) c         = (sortExpr c) : listAdd (sortExpr a) (sortExpr b)
+listAdd a         b         = [(sortExpr a),(sortExpr b)]
+
+sortMul :: Expr -> Expr -> Expr
+sortMul a b = foldl Mul x xs
+  where l = listMul a b
+        (x:xs) = sort l
+
+listMul :: Expr -> Expr -> [Expr]
+listMul (Mul a b) (Mul c d) = listMul (sortExpr a) (sortExpr b) ++ listMul (sortExpr c) (sortExpr d)
+listMul a         (Mul b c) = (sortExpr a) : listMul (sortExpr b) (sortExpr c)
+listMul (Mul a b) c         = (sortExpr c) : listMul (sortExpr a) (sortExpr b)
+listMul a         b         = [(sortExpr a),(sortExpr b)]
 
 -----------------------------------------------------------------------------
 -- G.
