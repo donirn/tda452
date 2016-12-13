@@ -115,8 +115,11 @@ cosP = prefixParser Cos "cos"
 -- Property prop_ShowReadExpr: Shows that first showing and then reading an
 -- expression (using your functions showExpr and readExpr) should produce
 -- "the same" result as the expression you started with.
-prop_ShowReadExpr :: Expr -> Bool
-prop_ShowReadExpr e = readExpr(showExpr e) == Just e
+prop_ShowReadExpr :: Expr -> Double -> Bool
+prop_ShowReadExpr e x = eval (fromJust (readExpr(showExpr e))) x `almostEqual` eval e x
+
+almostEqual :: Double -> Double -> Bool
+almostEqual x y = abs(x-y) < 1.0e-6
 
 instance Arbitrary Expr where
   arbitrary = sized arbExpr
