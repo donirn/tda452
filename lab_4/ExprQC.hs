@@ -15,9 +15,6 @@ prop_ShowReadExpr e = fromJust (readExpr(showExpr e)) `exprEqual` e
 almostEqual :: Double -> Double -> Bool
 almostEqual x y = abs(x-y) < 1.0e-6
 
-exprEqual :: Expr -> Expr -> Bool
-exprEqual a b = sortExpr a == sortExpr b
-
 instance Arbitrary Expr where
   arbitrary = sized arbExpr
 arbExpr :: Int -> Gen Expr

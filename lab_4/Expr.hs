@@ -23,6 +23,10 @@ data Expr = Add Expr Expr
 
 instance Show Expr where
   show = showExpr
+
+exprEqual :: Expr -> Expr -> Bool
+exprEqual a b = sortExpr a == sortExpr b
+
 -- 2*sin x + 0.5*cos(10*x)
 ex1 = Add (Mul (Num 2) (Sin Var)) (Mul (Num 0.5) (Cos (Mul (Num 10) Var)))
 ex1' = "2.0*sin x +0.5*cos (10.0*x)"
@@ -113,12 +117,19 @@ cosP = prefixParser Cos "cos"
 -- Function simplify: simplifies expressions so that subexpressions not
 -- involving variables are always simplified to their smallest
 -- representation.
+
+exS1 = simplify (Add Var (Add (Num 2) Var))
+exS2 = Add Var (Add (Num 2) (Add (Num 3) (Add (Num 4) Var)))
+
 simplify :: Expr -> Expr
-simplify (Add a b)  =   add (simplify a) (simplify b)
-simplify (Mul a b)  =   mul (simplify a) (simplify b)
-simplify (Sin e)    =   Sin (simplify e)
-simplify (Cos e)    =   Cos (simplify e)
-simplify e          =   e
+simplify e = simplify' (sortExpr e)
+
+simplify' :: Expr -> Expr
+simplify' (Add a b)  =   add (simplify' a) (simplify' b)
+simplify' (Mul a b)  =   mul (simplify' a) (simplify' b)
+simplify' (Sin e)    =   Sin (simplify' e)
+simplify' (Cos e)    =   Cos (simplify' e)
+simplify' e          =   e
 
 mul :: Expr -> Expr -> Expr
 mul (Num 0) b         = Num 0
@@ -126,6 +137,7 @@ mul a       (Num 0)   = Num 0
 mul (Num 1) b         = b
 mul a       (Num 1)   = a
 mul (Num x) (Num y)   = Num (x*y)
+mul (Mul e (Num a)) (Num b) = mul e (Num (a*b))
 mul a       b         = Mul a b
 
 -- TODO: should take account for Var
@@ -137,6 +149,9 @@ add :: Expr -> Expr -> Expr
 add (Num 0) a         = a
 add a       (Num 0)   = a
 add (Num x) (Num y)   = Num (x+y)
+add Var     Var       = Mul (Num 2) Var
+add (Mul a (Num b)) (Mul c (Num d)) | a `exprEqual` c = Mul (Num (b+d)) a
+add a       (Mul b (Num c))         | a `exprEqual` b = Mul (Num (c+1)) a
 add a       b         = Add a b
 
 sortExpr :: Expr -> Expr
@@ -174,13 +189,25 @@ listMul a         b         = [(sortExpr a),(sortExpr b)]
 
 -- FIXME: use "simplify" function instead of "add" and "mul"
 differentiate :: Expr -> Expr
-differentiate (Num n)   = Num 0
-differentiate Var       = Num 1
-differentiate (Add a b) = add (differentiate a) (differentiate b)
-differentiate (Mul a b) = add (mul a (differentiate b))
-                                (mul b (differentiate a))
-differentiate (Sin e)     = mul (differentiate e) (Cos e)
-differentiate (Cos e)     = mul (Num (-1)) (mul (differentiate e) (Sin e))
+differentiate e = differentiate' (sortExpr e)
+
+differentiate' :: Expr -> Expr
+differentiate' (Num n)   = Num 0
+differentiate' Var       = Num 1
+differentiate' (Add a b) = simplify (Add (differentiate' a) (differentiate' b))
+differentiate' (Mul a b) = simplify (Add (Mul a (differentiate' b))
+                                (Mul b (differentiate' a)))
+differentiate' (Sin e)   = simplify (Mul (differentiate' e) (Cos e))
+differentiate' (Cos e)   = simplify (mul (Num (-1)) (mul (differentiate' e) (Sin e)))
 
 -- FIXME: failed, the result should be "(-1) 12*x*x*x*sin (3*x*x*x*x)"
 exG1 = fromJust (readExpr "cos(3*x*x*x*x)")
+exG2 = fromJust (readExpr "x*x")
+exG3 = fromJust (readExpr "x*x*x")
+exG4 = fromJust (readExpr "x*x*x*x")
+exG5 = fromJust (readExpr "5*x*x*x*x")
+exG6 = fromJust (readExpr "x*x*x*x*x")
+exG7 = fromJust (readExpr "sinx*x*x*x*x")
+exG8 = fromJust (readExpr "x*x+x*x")
+exG9 = fromJust (readExpr "x*x*x+x*x*x")
+exG10 = fromJust (readExpr "5*x*x*x+x*x*x")
